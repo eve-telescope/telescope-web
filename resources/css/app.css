@@ -4,5 +4,55 @@
 @source '../../storage/framework/views/*.php';
 
 @theme inline {
-    --font-sans: Instrument Sans, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Share Tech Mono', 'JetBrains Mono', ui-monospace, monospace;
+
+    --color-eve-bg-0: #0d0e10;
+    --color-eve-bg-1: #13151a;
+    --color-eve-bg-2: #1a1d24;
+    --color-eve-bg-3: #22262f;
+
+    --color-eve-cyan: #00d4ff;
+    --color-eve-cyan-dim: #00a8cc;
+    --color-eve-orange: #ff6b00;
+    --color-eve-red: #ff3b3b;
+    --color-eve-green: #00ff88;
+    --color-eve-yellow: #ffd93d;
+
+    --color-eve-text-1: #e8eaed;
+    --color-eve-text-2: #9aa0a6;
+    --color-eve-text-3: #5f6368;
+
+    --color-eve-border: #2a2f3a;
+    --color-eve-border-glow: rgba(0, 212, 255, 0.3);
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-eve-bg-1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-eve-bg-3);
+    border-radius: 4px;
+    border: 2px solid var(--color-eve-bg-1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-eve-cyan-dim);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--color-eve-bg-1);
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-eve-bg-3) var(--color-eve-bg-1);
 }
