@@ -55,7 +55,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head :title="`Shared Scan - ${share.pilotCount} Pilots`" />
+    <Head :title="`${share.pilotCount} Pilots Shared`" />
 
     <div class="relative min-h-screen overflow-hidden bg-eve-bg-0">
         <!-- Animated starfield background -->

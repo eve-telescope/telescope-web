@@ -18,7 +18,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="Telescope - EVE Online Intel Tool" />
+    <Head title="EVE Online Intel Tool" />
 
     <div class="relative min-h-screen overflow-hidden bg-eve-bg-0">
         <!-- Animated starfield background -->
@@ -77,6 +77,14 @@ onMounted(() => {
 
                 <h1 class="mb-3 text-5xl font-bold tracking-wider text-eve-text-1 drop-shadow-[0_0_30px_rgba(0,212,255,0.3)]">TELESCOPE</h1>
                 <p class="text-lg tracking-widest text-eve-cyan">EVE ONLINE INTEL TOOL</p>
+            </div>
+
+            <!-- App Screenshot -->
+            <div class="relative mb-16 w-full max-w-5xl">
+                <div class="absolute -inset-1 rounded-lg bg-gradient-to-r from-eve-cyan/20 via-eve-orange/10 to-eve-cyan/20 opacity-50 blur-lg" />
+                <div class="relative overflow-hidden rounded-lg border border-eve-border shadow-2xl shadow-eve-cyan/10">
+                    <img src="/app.png" alt="Telescope App Screenshot" class="w-full" />
+                </div>
             </div>
 
             <!-- Feature cards -->
@@ -148,7 +156,8 @@ onMounted(() => {
                 <p class="mb-6 text-xs tracking-widest text-eve-text-3">AVAILABLE FOR</p>
                 <div class="flex flex-wrap justify-center gap-4">
                     <a
-                        href="#"
+                        href="https://github.com/eve-telescope/telescope-app/releases/latest"
+                        target="_blank"
                         class="group relative overflow-hidden rounded-lg border border-eve-border bg-eve-bg-2 px-8 py-4 transition-all hover:border-eve-cyan hover:shadow-[0_0_30px_rgba(0,212,255,0.2)]"
                     >
                         <div
@@ -168,7 +177,8 @@ onMounted(() => {
                     </a>
 
                     <a
-                        href="#"
+                        href="https://github.com/eve-telescope/telescope-app/releases/latest"
+                        target="_blank"
                         class="group relative overflow-hidden rounded-lg border border-eve-border bg-eve-bg-2 px-8 py-4 transition-all hover:border-eve-cyan hover:shadow-[0_0_30px_rgba(0,212,255,0.2)]"
                     >
                         <div
@@ -188,7 +198,8 @@ onMounted(() => {
                     </a>
 
                     <a
-                        href="#"
+                        href="https://github.com/eve-telescope/telescope-app/releases/latest"
+                        target="_blank"
                         class="group relative overflow-hidden rounded-lg border border-eve-border bg-eve-bg-2 px-8 py-4 transition-all hover:border-eve-cyan hover:shadow-[0_0_30px_rgba(0,212,255,0.2)]"
                     >
                         <div
@@ -213,7 +224,8 @@ onMounted(() => {
             <div class="mt-12 text-center">
                 <p class="text-xs text-eve-text-3">v0.1.0 • Open Source</p>
                 <a
-                    href="https://github.com/timkunze/telescope"
+                    href="https://github.com/eve-telescope/telescope-app"
+                    target="_blank"
                     class="mt-2 inline-flex items-center gap-2 text-xs text-eve-text-3 transition-colors hover:text-eve-cyan"
                 >
                     <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
