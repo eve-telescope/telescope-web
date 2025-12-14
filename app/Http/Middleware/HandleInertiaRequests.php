@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\GitHubService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -49,6 +50,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'appVersion' => app(GitHubService::class)->getLatestVersion(),
         ];
     }
 }

@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
-import { onMounted, ref } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, ref } from 'vue';
+
+const page = usePage();
+const appVersion = computed(() => page.props.appVersion ?? 'v0.1.0');
 
 const stars = ref<{ x: number; y: number; size: number; opacity: number; delay: number }[]>([]);
 
@@ -222,7 +225,7 @@ onMounted(() => {
 
             <!-- Version info -->
             <div class="mt-12 text-center">
-                <p class="text-xs text-eve-text-3">v0.1.0 • Open Source</p>
+                <p class="text-xs text-eve-text-3">{{ appVersion }} • Open Source</p>
                 <a
                     href="https://github.com/eve-telescope/telescope-app"
                     target="_blank"
