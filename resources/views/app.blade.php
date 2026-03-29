@@ -13,10 +13,10 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=share-tech-mono:400|jetbrains-mono:400,500,600,700" rel="stylesheet" />
 
-        @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
-        @inertiaHead
+        @vite(['resources/js/app.ts'])
+        <x-inertia::head />
     </head>
     <body class="font-sans antialiased">
-        @inertia
+        <x-inertia::app />
     </body>
 </html>
