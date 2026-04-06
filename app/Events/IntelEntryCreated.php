@@ -15,7 +15,7 @@ class IntelEntryCreated implements ShouldBroadcastNow, ShouldDispatchAfterCommit
 
     public function __construct(
         public readonly int $network_id,
-        public readonly array $entry,
+        public readonly int $entry_id,
     ) {}
 
     public function broadcastOn(): array

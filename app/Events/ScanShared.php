@@ -15,7 +15,7 @@ class ScanShared implements ShouldBroadcastNow, ShouldDispatchAfterCommit
 
     public function __construct(
         public readonly int $network_id,
-        public readonly array $scan,
+        public readonly int $scan_id,
     ) {}
 
     public function broadcastOn(): array

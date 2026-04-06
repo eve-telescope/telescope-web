@@ -26,6 +26,17 @@ class NetworkScanController extends Controller
         return response()->json($scans);
     }
 
+    public function show(Request $request, IntelNetwork $network, NetworkScan $scan)
+    {
+        $this->authorize('view', $network);
+
+        abort_unless($scan->intel_network_id === $network->id, 404);
+
+        $scan->load('user');
+
+        return response()->json(NetworkScanData::fromModel($scan)->toArray());
+    }
+
     public function store(Request $request, IntelNetwork $network)
     {
         $this->authorize('addEntry', $network);
@@ -43,12 +54,10 @@ class NetworkScanController extends Controller
             'solar_system' => $request->solar_system,
         ]);
 
+        broadcast(new ScanShared($network->id, $scan->id));
+
         $scan->load('user');
 
-        $data = NetworkScanData::fromModel($scan)->toArray();
-
-        broadcast(new ScanShared($network->id, $data));
-
-        return response()->json($data, 201);
+        return response()->json(NetworkScanData::fromModel($scan)->toArray(), 201);
     }
 }

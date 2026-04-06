@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     // Network Scans
     Route::get('/networks/{network}/scans', [NetworkScanController::class, 'index']);
     Route::post('/networks/{network}/scans', [NetworkScanController::class, 'store']);
+    Route::get('/networks/{network}/scans/{scan}', [NetworkScanController::class, 'show']);
 
     // Bulk Intel Lookup
     Route::get('/intel/lookup', [IntelEntryController::class, 'lookup']);
