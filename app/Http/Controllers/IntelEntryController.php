@@ -48,7 +48,7 @@ class IntelEntryController extends Controller
 
         $entry->load('addedBy');
 
-        broadcast(new IntelEntryCreated($network->id, $entry->toArray()))->toOthers();
+        broadcast(new IntelEntryCreated($network->id, $entry->toArray()));
 
         return response()->json($entry, 201);
     }
@@ -67,7 +67,7 @@ class IntelEntryController extends Controller
         $entry->update($request->only(['color', 'label', 'entity_name', 'notes']));
         $entry->load('addedBy');
 
-        broadcast(new IntelEntryUpdated($network->id, $entry->toArray()))->toOthers();
+        broadcast(new IntelEntryUpdated($network->id, $entry->toArray()));
 
         return response()->json($entry);
     }
@@ -79,7 +79,7 @@ class IntelEntryController extends Controller
         $entryId = $entry->id;
         $entry->delete();
 
-        broadcast(new IntelEntryDeleted($network->id, $entryId))->toOthers();
+        broadcast(new IntelEntryDeleted($network->id, $entryId));
 
         return response()->json(['message' => 'Entry deleted']);
     }

@@ -47,7 +47,7 @@ class NetworkScanController extends Controller
 
         $data = NetworkScanData::fromModel($scan)->toArray();
 
-        broadcast(new ScanShared($network->id, $data))->toOthers();
+        broadcast(new ScanShared($network->id, $data));
 
         return response()->json($data, 201);
     }
