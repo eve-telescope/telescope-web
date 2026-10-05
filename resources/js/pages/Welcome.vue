@@ -5,6 +5,45 @@ import { computed, onMounted, ref } from 'vue';
 const page = usePage();
 const appVersion = computed(() => page.props.appVersion ?? 'v0.1.0');
 
+const features = [
+    {
+        title: 'Local scans',
+        description: 'Paste local chat and pilots stream in as they are looked up.',
+        color: 'text-eve-cyan',
+        icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    },
+    {
+        title: 'Danger score',
+        description: 'One 0 to 100 rating per pilot, weighted toward small-gang lethality, with a breakdown on hover.',
+        color: 'text-eve-orange',
+        icon: '<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>',
+    },
+    {
+        title: 'Pilot roles',
+        description: 'Recons, marauders, cynos, capitals and more, shown as in-game hull brackets.',
+        color: 'text-eve-red',
+        icon: '<path d="M12 3 3 19h18L12 3Z"/><path d="m12 9-3.5 6h7L12 9Z"/>',
+    },
+    {
+        title: 'D-scan',
+        description: 'Ship counts by type and class, sorted by hull size.',
+        color: 'text-eve-green',
+        icon: '<path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/>',
+    },
+    {
+        title: 'Intel networks',
+        description: 'Tag pilots, corporations and alliances and share scans with your group in real time.',
+        color: 'text-eve-cyan',
+        icon: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/>',
+    },
+    {
+        title: 'Overlay and hotkey',
+        description: 'An always-on-top window and a global hotkey to scan the clipboard while EVE has focus.',
+        color: 'text-eve-yellow',
+        icon: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+    },
+];
+
 const stars = ref<{ x: number; y: number; size: number; opacity: number; delay: number }[]>([]);
 
 onMounted(() => {
@@ -46,117 +85,48 @@ onMounted(() => {
         <div class="absolute inset-0 bg-gradient-to-b from-eve-bg-0 via-transparent to-eve-bg-0 opacity-60" />
         <div class="absolute inset-0 bg-gradient-to-r from-eve-cyan/5 via-transparent to-eve-orange/5" />
 
-        <!-- Scan line effect -->
-        <div class="pointer-events-none absolute inset-0 overflow-hidden">
-            <div
-                class="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,212,255,0.03)_2px,rgba(0,212,255,0.03)_4px)]"
-            />
-        </div>
-
         <!-- Main content -->
         <div class="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 py-20">
-            <!-- Logo / Title -->
             <div class="mb-12 text-center">
                 <div class="relative inline-block">
-                    <!-- Glow effect -->
-                    <div class="absolute -inset-4 rounded-full bg-eve-cyan/20 blur-2xl" />
+                    <div class="absolute inset-4 rounded-full bg-eve-cyan/25 blur-3xl" />
+                    <img src="/logo.png" alt="Telescope" class="relative mx-auto mb-6 h-28 w-28" />
+                </div>
 
-                    <!-- Telescope icon -->
+                <h1 class="mb-3 text-5xl font-semibold tracking-tight text-eve-text-1">Telescope</h1>
+                <p class="text-lg text-eve-text-2">Intel tool for EVE Online. Instant pilot lookups and danger ratings.</p>
+            </div>
+
+            <div class="relative mb-16 w-full max-w-6xl">
+                <div class="absolute -inset-1 rounded-xl bg-gradient-to-r from-eve-cyan/20 via-eve-orange/10 to-eve-cyan/20 opacity-40 blur-xl" />
+                <img src="/app.png" alt="Telescope showing a local scan" class="relative w-full" />
+            </div>
+
+            <div class="mb-16 grid w-full max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div
+                    v-for="feature in features"
+                    :key="feature.title"
+                    class="rounded-lg border border-eve-border bg-eve-bg-1/80 p-5 backdrop-blur-sm transition-colors hover:border-eve-cyan/40"
+                >
                     <svg
-                        class="relative mx-auto mb-6 h-24 w-24 drop-shadow-[0_0_20px_rgba(0,212,255,0.5)]"
+                        class="mb-3 h-6 w-6"
+                        :class="feature.color"
                         viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <rect x="0" y="0" width="24" height="24" rx="4.5" fill="#12151a" />
-                        <g stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                            <circle cx="12" cy="12" r="7" />
-                            <line x1="19" x2="16" y1="12" y2="12" />
-                            <line x1="8" x2="5" y1="12" y2="12" />
-                            <line x1="12" x2="12" y1="8" y2="5" />
-                            <line x1="12" x2="12" y1="19" y2="16" />
-                        </g>
-                    </svg>
-                </div>
-
-                <h1 class="mb-3 text-5xl font-bold tracking-wider text-eve-text-1 drop-shadow-[0_0_30px_rgba(0,212,255,0.3)]">TELESCOPE</h1>
-                <p class="text-lg tracking-widest text-eve-cyan">EVE ONLINE INTEL TOOL</p>
-            </div>
-
-            <!-- App Screenshot -->
-            <div class="relative mb-16 w-full max-w-5xl">
-                <div class="absolute -inset-1 rounded-lg bg-gradient-to-r from-eve-cyan/20 via-eve-orange/10 to-eve-cyan/20 opacity-50 blur-lg" />
-                <div class="relative overflow-hidden rounded-lg border border-eve-border shadow-2xl shadow-eve-cyan/10">
-                    <img src="/app.png" alt="Telescope App Screenshot" class="w-full" />
-                </div>
-            </div>
-
-            <!-- Feature cards -->
-            <div class="mb-12 grid max-w-4xl gap-6 md:grid-cols-3">
-                <div
-                    class="group relative overflow-hidden rounded-lg border border-eve-border bg-eve-bg-1/80 p-6 backdrop-blur-sm transition-all hover:border-eve-cyan/50 hover:shadow-[0_0_30px_rgba(0,212,255,0.1)]"
-                >
-                    <div class="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-eve-cyan/10 blur-2xl transition-all group-hover:bg-eve-cyan/20" />
-                    <div class="relative">
-                        <div class="mb-3 text-eve-cyan">
-                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-                                />
-                            </svg>
-                        </div>
-                        <h3 class="mb-2 text-sm font-semibold tracking-wider text-eve-text-1">INSTANT LOOKUP</h3>
-                        <p class="text-xs leading-relaxed text-eve-text-2">Paste local chat, get instant threat assessment from zKillboard data</p>
-                    </div>
-                </div>
-
-                <div
-                    class="group relative overflow-hidden rounded-lg border border-eve-border bg-eve-bg-1/80 p-6 backdrop-blur-sm transition-all hover:border-eve-orange/50 hover:shadow-[0_0_30px_rgba(255,107,0,0.1)]"
-                >
-                    <div
-                        class="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-eve-orange/10 blur-2xl transition-all group-hover:bg-eve-orange/20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.75"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        v-html="feature.icon"
                     />
-                    <div class="relative">
-                        <div class="mb-3 text-eve-orange">
-                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-                                />
-                            </svg>
-                        </div>
-                        <h3 class="mb-2 text-sm font-semibold tracking-wider text-eve-text-1">THREAT ANALYSIS</h3>
-                        <p class="text-xs leading-relaxed text-eve-text-2">See kill history, favorite ships, activity patterns, and danger ratings</p>
-                    </div>
-                </div>
-
-                <div
-                    class="group relative overflow-hidden rounded-lg border border-eve-border bg-eve-bg-1/80 p-6 backdrop-blur-sm transition-all hover:border-eve-green/50 hover:shadow-[0_0_30px_rgba(0,255,136,0.1)]"
-                >
-                    <div
-                        class="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-eve-green/10 blur-2xl transition-all group-hover:bg-eve-green/20"
-                    />
-                    <div class="relative">
-                        <div class="mb-3 text-eve-green">
-                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"
-                                />
-                            </svg>
-                        </div>
-                        <h3 class="mb-2 text-sm font-semibold tracking-wider text-eve-text-1">SHARE INTEL</h3>
-                        <p class="text-xs leading-relaxed text-eve-text-2">Share scans via link — your corp mates can open results instantly</p>
-                    </div>
+                    <h3 class="mb-1.5 text-sm font-semibold text-eve-text-1">{{ feature.title }}</h3>
+                    <p class="text-sm leading-relaxed text-eve-text-2">{{ feature.description }}</p>
                 </div>
             </div>
 
             <!-- Download section -->
             <div class="text-center">
-                <p class="mb-6 text-xs tracking-widest text-eve-text-3">AVAILABLE FOR</p>
+                <p class="mb-6 text-xs font-medium tracking-widest text-eve-text-3">AVAILABLE FOR</p>
                 <div class="flex flex-wrap justify-center gap-4">
                     <a
                         href="https://github.com/eve-telescope/telescope-app/releases/latest"

@@ -4,25 +4,26 @@
 @source '../../storage/framework/views/*.php';
 
 @theme inline {
-    --font-sans: 'Share Tech Mono', 'JetBrains Mono', ui-monospace, monospace;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-    --color-eve-bg-0: #0d0e10;
-    --color-eve-bg-1: #13151a;
-    --color-eve-bg-2: #1a1d24;
-    --color-eve-bg-3: #22262f;
+    --color-eve-bg-0: #0a0a0b;
+    --color-eve-bg-1: #101012;
+    --color-eve-bg-2: #16161a;
+    --color-eve-bg-3: #232329;
 
     --color-eve-cyan: #00d4ff;
-    --color-eve-cyan-dim: #00a8cc;
-    --color-eve-orange: #ff6b00;
-    --color-eve-red: #ff3b3b;
-    --color-eve-green: #00ff88;
-    --color-eve-yellow: #ffd93d;
+    --color-eve-cyan-dim: #0099bb;
+    --color-eve-orange: #ff9944;
+    --color-eve-red: #ff5566;
+    --color-eve-green: #44ddaa;
+    --color-eve-yellow: #ffaa22;
 
-    --color-eve-text-1: #e8eaed;
-    --color-eve-text-2: #9aa0a6;
-    --color-eve-text-3: #5f6368;
+    --color-eve-text-1: #f2f2f4;
+    --color-eve-text-2: #b4b4bd;
+    --color-eve-text-3: #8b8b96;
 
-    --color-eve-border: #2a2f3a;
+    --color-eve-border: #2c2c34;
     --color-eve-border-glow: rgba(0, 212, 255, 0.3);
 }
 
