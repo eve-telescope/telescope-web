@@ -80,29 +80,13 @@ onMounted(() => {
         <div class="absolute inset-0 bg-gradient-to-b from-eve-bg-0 via-transparent to-eve-bg-0 opacity-60" />
         <div class="absolute inset-0 bg-gradient-to-r from-eve-orange/5 via-transparent to-eve-cyan/5" />
 
-        <!-- Scan line effect -->
-        <div class="pointer-events-none absolute inset-0 overflow-hidden">
-            <div
-                class="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,212,255,0.03)_2px,rgba(0,212,255,0.03)_4px)]"
-            />
-        </div>
-
         <!-- Main content -->
         <div class="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 py-20">
             <!-- Header -->
             <div class="mb-8 text-center">
                 <a href="/" class="inline-flex items-center gap-3 transition-opacity hover:opacity-80">
-                    <svg class="h-10 w-10 drop-shadow-[0_0_10px_rgba(0,212,255,0.4)]" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="0" y="0" width="24" height="24" rx="4.5" fill="#12151a" />
-                        <g stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                            <circle cx="12" cy="12" r="7" />
-                            <line x1="19" x2="16" y1="12" y2="12" />
-                            <line x1="8" x2="5" y1="12" y2="12" />
-                            <line x1="12" x2="12" y1="8" y2="5" />
-                            <line x1="12" x2="12" y1="19" y2="16" />
-                        </g>
-                    </svg>
-                    <h1 class="text-2xl font-bold tracking-wider text-eve-text-1">TELESCOPE</h1>
+                    <img src="/logo.png" alt="" class="h-10 w-10" />
+                    <h1 class="text-2xl font-semibold text-eve-text-1">Telescope</h1>
                 </a>
             </div>
 
