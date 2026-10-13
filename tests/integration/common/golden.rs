@@ -25,6 +25,8 @@
 //! - N7: HTML error pages are compared by status and title; Laravel's 405
 //!   page was Symfony's fallback, ours is the minimal page of every other
 //!   status.
+//! - N8: the page props come from `/api/pages/*`, under the API's CORS;
+//!   the pages themselves (SvelteKit) answer without CORS headers.
 
 use serde_json::{Map, Value};
 use time::OffsetDateTime;

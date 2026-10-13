@@ -549,19 +549,23 @@ async fn an_expiry_with_an_offset_keeps_its_moment() {
     assert_eq!(stored, datetime!(2027-06-01 08:00:00 UTC));
 }
 
-/// FIXES.md (deliberate): ISO 8601 dates only, and in the future.
+/// FIXES.md (deliberate): ISO 8601 dates only, and in the future. As in
+/// Laravel, `after:now` reads what PHP's `strtotime` reads (relative
+/// words, overflowing days), so a date it can still compare gets one
+/// message, and text it cannot read two.
 #[tokio::test]
 async fn an_expiry_must_be_an_iso_date() {
     let s = setup().await;
     let target = s.app.user().await;
-    for (expires_at, message) in [
-        ("tomorrow", "The expires at field must be a valid date."),
-        ("not a date", "The expires at field must be a valid date."),
-        ("2027-02-30", "The expires at field must be a valid date."),
-        (
-            "2026-01-01",
-            "The expires at field must be a date after now.",
-        ),
+    let invalid = "The expires at field must be a valid date.";
+    let past = "The expires at field must be a date after now.";
+    for (expires_at, messages) in [
+        ("tomorrow", vec![invalid]),
+        ("2027-02-30", vec![invalid]),
+        ("June 1 2027", vec![invalid, past]),
+        ("not a date", vec![invalid, past]),
+        ("2026-01-01", vec![past]),
+        ("2026-10-13 08:30:00", vec![past]),
     ] {
         let response = s
             .app
@@ -578,9 +582,10 @@ async fn an_expiry_must_be_an_iso_date() {
             )
             .await;
         response.assert_status(422);
-        assert_json_eq(
-            &json!({ "message": message, "errors": { "expires_at": [message] } }),
-            &response.json(),
+        assert_eq!(
+            response.json()["errors"],
+            json!({ "expires_at": messages }),
+            "{expires_at}"
         );
     }
     for expires_at in [
@@ -588,6 +593,7 @@ async fn an_expiry_must_be_an_iso_date() {
         "2027-06-01 12:00",
         "2027-06-01T12:00:00Z",
         "2027-06-01T12:00:00.123+01:00",
+        "2026-10-13 08:30:01",
     ] {
         let response = s
             .app

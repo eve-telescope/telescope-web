@@ -20,6 +20,7 @@ async fn main() {
         .expect("database migrations");
 
     let state = telescope::server::AppState::new(pool, config, telescope::clock::Clock::system());
+    telescope::scheduler::spawn(state.clone());
     let app = telescope::server::router(state);
 
     tracing::info!("listening on http://{addr}");

@@ -105,6 +105,11 @@ fn fixed(name: &str) -> Option<Fixed> {
 
 /// FIXES.md changes inside an otherwise equal answer.
 fn patch_expected(name: &str, fixture: &mut Value) {
+    if name == "entries_store_string_id" {
+        // FIXES.md (deliberate): numbers are always numbers
+        // (intel_entry::an_entity_id_sent_as_text_is_answered_as_a_number).
+        fixture["response"]["json"]["entity_id"] = json!(90_001_012);
+    }
     if name == "access_store_expiry_with_offset" {
         // FIXES.md: the moment is kept
         // (network_access::an_expiry_with_an_offset_keeps_its_moment).
@@ -255,9 +260,12 @@ async fn replay(name: &str) {
     patch_expected(name, &mut fixture);
     let started = fixture["started_at"].as_i64().expect("a start");
     let finished = fixture["finished_at"].as_i64().expect("an end");
-    let app =
+    let mut app =
         TestApp::with_dataset(OffsetDateTime::from_unix_timestamp(started).expect("a moment"))
             .await;
+    // The reference's Reverb secret (scripts/laravel-reference/env), so
+    // the channel signatures compare byte for byte.
+    app.reconfigure(|config| config.pusher.secret = "reference-reverb-secret".to_owned());
     // The release GitHub answered when the fixtures were recorded.
     if let Some(version) = read_json("golden/meta.json")["app_version"].as_str() {
         app.github.latest(version);
@@ -308,7 +316,12 @@ async fn replay(name: &str) {
             "location" | "allow" | "x-inertia-location" => {
                 assert_eq!(response.header(header), Some(value), "{name}: {header}");
             }
-            header if header.starts_with("access-control-") => {
+            // N8: page props come from `/api/pages/*`, under the API's
+            // CORS; the pages themselves (SvelteKit) send none.
+            header
+                if header.starts_with("access-control-")
+                    && fixture["request"]["inertia"] != true =>
+            {
                 assert_eq!(response.header(header), Some(value), "{name}: {header}");
             }
             "vary" if value.contains("Access-Control") => {
@@ -322,7 +335,7 @@ async fn replay(name: &str) {
         "access-control-allow-methods",
         "allow",
     ] {
-        if !recorded_headers.contains_key(header) {
+        if !recorded_headers.contains_key(header) && fixture["request"]["inertia"] != true {
             assert_eq!(response.header(header), None, "{name}: {header}");
         }
     }
@@ -332,9 +345,9 @@ async fn replay(name: &str) {
         let (recorded, ours) =
             if fixture["request"]["inertia"] == true && recorded.get("props").is_some() {
                 let mut props = recorded["props"].as_object().cloned().expect("props");
-                props.remove("errors");
+                props.shift_remove("errors");
                 let mut ours = response.json().as_object().cloned().expect("props");
-                ours.remove("demoLoginEnabled");
+                ours.shift_remove("demoLoginEnabled");
                 (Value::Object(props), Value::Object(ours))
             } else {
                 (recorded.clone(), response.json())

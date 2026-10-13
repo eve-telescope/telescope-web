@@ -69,6 +69,7 @@ async fn replay(name: &str) {
     let address = app.serve().await;
     let mut clients: HashMap<String, PusherClient> = HashMap::new();
     let mut socket_ids: HashMap<String, String> = HashMap::new();
+    let mut closed: std::collections::HashSet<String> = std::collections::HashSet::new();
     for step in fixture["steps"].as_array().expect("steps") {
         if let Some(request) = step.get("http") {
             let method: Method = request["method"]
@@ -125,8 +126,16 @@ async fn replay(name: &str) {
         } else if step.get("silent").is_some() {
             let socket = clients.get_mut(client).expect("a client");
             let next = socket.next_within(SILENCE).await;
-            assert_eq!(next, Next::Silent, "{name}: expected silence");
-        } else if let Some(closed) = step.get("closed") {
+            // After its close frame Reverb left the connection open; the
+            // rewrite ends it, which is just as silent.
+            let closed_before = closed.contains(client);
+            assert!(
+                next == Next::Silent || (closed_before && next == Next::Dropped),
+                "{name}: expected silence, got {next:?}"
+            );
+        } else if let Some(closed_step) = step.get("closed") {
+            closed.insert(client.to_owned());
+            let closed = closed_step;
             let socket = clients.get_mut(client).expect("a client");
             let next = socket.next_within(Duration::from_secs(5)).await;
             let code = closed["code"].as_u64().expect("a code") as u16;

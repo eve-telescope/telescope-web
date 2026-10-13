@@ -307,10 +307,10 @@ Tests: `pusher_protocol::a_presence_channel_is_refused`,
 ### Slugs of scripts PHP did not transliterate
 
 A new network's slug comes from the `deunicode` crate, which agrees with
-`Str::slug` on every recorded Latin, Greek and Cyrillic name but also
-spells out Chinese, Japanese and emoji, where PHP's table left nothing
-(`-a1B2c3` alone). Slugs are only shown, never looked up. The test lists
-every difference.
+`Str::slug` on every recorded Latin and Cyrillic name, spells Greek `η`
+as `e` where PHP wrote `i`, and spells out Chinese, Japanese and emoji,
+where PHP's table left nothing (`-a1B2c3` alone). Slugs are only shown,
+never looked up. The test lists every difference.
 
 Test: `golden_php::slugs_match_laravel`.
 

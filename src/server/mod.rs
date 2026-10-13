@@ -11,6 +11,7 @@
 pub mod cors;
 pub mod errors;
 pub mod health;
+pub mod pages;
 
 use std::sync::Arc;
 
@@ -19,12 +20,17 @@ use axum::extract::{DefaultBodyLimit, Request};
 use axum::http::{Method, StatusCode, header};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
-use axum::routing::{get, post};
+use axum::routing::{delete, get, post, put};
 use sqlx::PgPool;
 use tower_http::normalize_path::NormalizePath;
 
+use crate::auth::login::UsedStates;
+use crate::auth::sso::SsoClient;
 use crate::clock::Clock;
 use crate::config::Config;
+use crate::esi::EsiClient;
+use crate::github::LatestRelease;
+use crate::pusher::Hub;
 
 /// The default bind address of the API server; the SvelteKit dev proxy and
 /// the reverse proxy point at it.
@@ -43,12 +49,22 @@ pub struct AppState {
     pub pool: PgPool,
     pub config: Arc<Config>,
     pub clock: Clock,
+    pub esi: EsiClient,
+    pub sso: SsoClient,
+    pub github: LatestRelease,
+    pub pusher: Hub,
+    pub used_states: UsedStates,
 }
 
 impl AppState {
     pub fn new(pool: PgPool, config: Config, clock: Clock) -> Self {
         Self {
             pool,
+            esi: EsiClient::new(&config.esi_base_url),
+            sso: SsoClient::new(config.eve.clone()),
+            github: LatestRelease::new(&config.github_api_url, clock.clone()),
+            pusher: Hub::new(),
+            used_states: UsedStates::default(),
             config: Arc::new(config),
             clock,
         }
@@ -56,85 +72,149 @@ impl AppState {
 }
 
 /// The whole app. A trailing slash reaches the same route, as it did.
+/// CORS and the error pages wrap the routing, so they see every answer as
+/// the router finished it (the `Allow` header of a 405 included).
 pub fn router(state: AppState) -> Router {
     let routes = routes(state);
-    Router::new().fallback_service(NormalizePath::trim_trailing_slash(routes))
+    let app = tower::ServiceBuilder::new()
+        .layer(axum::middleware::from_fn(cors::handle))
+        .layer(axum::middleware::from_fn(errors::negotiate))
+        .service(NormalizePath::trim_trailing_slash(routes));
+    Router::new().fallback_service(app)
 }
 
 fn routes(state: AppState) -> Router {
-    use errors::not_implemented;
+    use crate::auth::login;
+    use crate::pusher::{auth, socket};
     Router::new()
         .route("/up", get(health::up))
-        // The EVE login, the CSRF cookie nothing uses and the local disk.
-        .route("/eve", get(not_implemented))
-        .route("/sanctum/csrf-cookie", get(not_implemented))
-        .route(
-            "/storage/{*path}",
-            get(not_implemented).put(not_implemented),
-        )
+        // The EVE login, the CSRF cookie nothing uses and the local disk,
+        // where nothing is stored.
+        .route("/eve", get(login::redirect))
+        .route("/sanctum/csrf-cookie", get(csrf_cookie))
+        .route("/storage/{*path}", get(storage).put(storage))
         // The realtime channel: subscription signatures and the socket.
         .route(
             "/broadcasting/auth",
-            get(not_implemented).post(not_implemented),
+            get(auth::authenticate).post(auth::authenticate),
         )
-        .route("/app/{key}", get(not_implemented))
+        .route("/app/{key}", get(socket::upgrade))
         .nest("/api", api_router())
         .fallback(errors::not_found)
-        .method_not_allowed_fallback(errors::method_not_allowed)
         .layer(DefaultBodyLimit::max(BODY_LIMIT))
         .layer(axum::middleware::from_fn_with_state(
             state.clone(),
             reload_inertia_requests,
         ))
-        .layer(axum::middleware::from_fn(errors::negotiate))
-        .layer(axum::middleware::from_fn(cors::handle))
         .with_state(state)
 }
 
 /// The desktop clients' API, the props of the pages and the health check.
 fn api_router() -> Router<AppState> {
-    use errors::not_implemented;
+    use crate::auth::login;
+    use crate::intel::{access, entries, networks, scans, search};
+    use crate::shares;
     Router::new()
         .route("/health", get(health::health))
-        .route("/pages/home", get(not_implemented))
-        .route("/pages/s/{code}", get(not_implemented))
-        .route("/pages/eve/callback", get(not_implemented))
-        .route("/pages/demo-login", get(not_implemented))
-        .route("/user", get(not_implemented))
-        .route("/share", post(not_implemented))
-        .route("/share/{code}", get(not_implemented))
-        .route("/tokens", post(not_implemented))
-        .route("/tokens/{token}", axum::routing::delete(not_implemented))
-        .route("/networks", get(not_implemented).post(not_implemented))
+        .route("/pages/home", get(pages::home))
+        .route("/pages/s/{code}", get(shares::page))
+        .route("/pages/eve/callback", get(login::callback))
+        .route("/pages/demo-login", get(login::demo))
+        .route("/user", get(user))
+        .route("/share", post(shares::store))
+        .route("/share/{code}", get(shares::fetch))
+        .route("/tokens", post(tokens_store))
+        .route("/tokens/{token}", delete(tokens_destroy))
+        .route("/networks", get(networks::index).post(networks::store))
         .route(
             "/networks/{network}",
-            get(not_implemented)
-                .put(not_implemented)
-                .delete(not_implemented),
+            get(networks::show)
+                .put(networks::update)
+                .delete(networks::destroy),
         )
         .route(
             "/networks/{network}/access",
-            get(not_implemented).post(not_implemented),
+            get(access::index).post(access::store),
         )
         .route(
             "/networks/{network}/access/{access}",
-            axum::routing::put(not_implemented).delete(not_implemented),
+            put(access::update).delete(access::destroy),
         )
         .route(
             "/networks/{network}/entries",
-            get(not_implemented).post(not_implemented),
+            get(entries::index).post(entries::store),
         )
         .route(
             "/networks/{network}/entries/{entry}",
-            axum::routing::put(not_implemented).delete(not_implemented),
+            put(entries::update).delete(entries::destroy),
         )
         .route(
             "/networks/{network}/scans",
-            get(not_implemented).post(not_implemented),
+            get(scans::index).post(scans::store),
         )
-        .route("/networks/{network}/scans/{scan}", get(not_implemented))
-        .route("/intel/lookup", get(not_implemented))
-        .route("/search", get(not_implemented))
+        .route("/networks/{network}/scans/{scan}", get(scans::show))
+        .route("/intel/lookup", get(entries::lookup))
+        .route("/search", get(search::search))
+}
+
+/// `GET /api/user`: the token's user.
+async fn user(caller: crate::auth::tokens::ApiUser) -> Response {
+    axum::Json(caller.user.json()).into_response()
+}
+
+/// `POST /api/tokens`: a new token for the caller, shown once.
+async fn tokens_store(
+    axum::extract::State(state): axum::extract::State<AppState>,
+    caller: crate::auth::tokens::ApiUser,
+    input: crate::input::Input,
+) -> Result<Response, Response> {
+    let now = state.clock.now();
+    let mut validator = crate::validation::Validator::new(&input, now);
+    validator.field("name").required().string().max(255);
+    validator.finish()?;
+    let name = input.str("name").expect("a validated name");
+    let (id, token) = crate::auth::tokens::create(&state.pool, caller.user.id, name, now)
+        .await
+        .map_err(errors::server_error)?;
+    Ok((
+        StatusCode::CREATED,
+        axum::Json(serde_json::json!({ "token": token, "name": name, "id": id })),
+    )
+        .into_response())
+}
+
+/// `DELETE /api/tokens/{tokenId}`: one of the caller's own tokens; the
+/// same answer whether it existed or not. A non-numeric id is not found
+/// (FIXES.md).
+async fn tokens_destroy(
+    axum::extract::State(state): axum::extract::State<AppState>,
+    caller: crate::auth::tokens::ApiUser,
+    axum::extract::Path(token): axum::extract::Path<String>,
+) -> Result<Response, Response> {
+    let Some(id) = crate::intel::route_id(&token) else {
+        return Err(errors::http_error(StatusCode::NOT_FOUND, "Not Found"));
+    };
+    sqlx::query(
+        "delete from personal_access_tokens
+         where id = $1 and tokenable_type = 'App\\Models\\User' and tokenable_id = $2",
+    )
+    .bind(id)
+    .bind(caller.user.id)
+    .execute(&state.pool)
+    .await
+    .map_err(errors::server_error)?;
+    Ok(axum::Json(serde_json::json!({ "message": "Token revoked" })).into_response())
+}
+
+/// `GET /sanctum/csrf-cookie`: 204, no cookies (FIXES.md, deliberate
+/// changes).
+async fn csrf_cookie() -> StatusCode {
+    StatusCode::NO_CONTENT
+}
+
+/// The local disk's routes: nothing is stored there.
+async fn storage() -> Response {
+    errors::http_error(StatusCode::NOT_FOUND, "Not Found")
 }
 
 /// Tabs left open on the Laravel site still send Inertia's XHR

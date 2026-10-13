@@ -101,13 +101,6 @@ pub async fn not_found(uri: Uri) -> Response {
     )
 }
 
-/// A known path with another method. The supported methods come from the
-/// `Allow` header the router adds (`negotiate` writes them into the
-/// message).
-pub async fn method_not_allowed() -> Response {
-    http_error(StatusCode::METHOD_NOT_ALLOWED, "")
-}
-
 /// The answer of every route that is registered but not ported yet.
 pub async fn not_implemented() -> Response {
     json_error(StatusCode::NOT_IMPLEMENTED, "Not Implemented")
