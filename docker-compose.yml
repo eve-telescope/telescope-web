@@ -96,6 +96,9 @@ services:
     environment:
       AXUM_URL: http://api:3000
       ORIGIN: ${ORIGIN:-http://localhost:5318}
+      # adapter-node takes the scheme of page URLs (og:url, the Inertia
+      # reload) from the proxy: http on :5318, https through the portal.
+      PROTOCOL_HEADER: x-forwarded-proto
     depends_on:
       - api
     restart: unless-stopped

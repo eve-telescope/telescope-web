@@ -46,6 +46,8 @@ services:
     environment:
       AXUM_URL: http://telescope-api:3000
       ORIGIN: https://eve-telescope.com
+      # The scheme of page URLs, from the shared Caddy.
+      PROTOCOL_HEADER: x-forwarded-proto
     depends_on:
       - api
     networks:

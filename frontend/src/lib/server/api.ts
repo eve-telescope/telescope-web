@@ -15,7 +15,7 @@ export async function apiGet<T>(fetch: typeof globalThis.fetch, path: string): P
   const response = await fetch(path, { redirect: 'manual' });
 
   if (response.status >= 300 && response.status < 400) {
-    redirect(response.status as RedirectStatus, response.headers.get('location') ?? '/');
+    redirect(response.status as RedirectStatus, sitePath(response.headers.get('location')));
   }
 
   if (!response.ok) {
@@ -23,6 +23,16 @@ export async function apiGet<T>(fetch: typeof globalThis.fetch, path: string): P
   }
 
   return response.json();
+}
+
+/** The api only ever redirects to the site itself (`APP_URL`); SvelteKit
+ * takes that as its path. */
+export function sitePath(location: string | null): string {
+  if (!location) {
+    return '/';
+  }
+  const url = new URL(location, 'http://site.invalid');
+  return `${url.pathname}${url.search}`;
 }
 
 /** The props endpoint of a page URL: `/api/pages` plus its path, the home

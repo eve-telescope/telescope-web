@@ -4,6 +4,14 @@
 # websocket (/app/<key>) is served here too; production also has its own
 # host for it.
 
+# The portal's https preview (https://telescope.test) proxies from this
+# host; its X-Forwarded-Proto passes through.
+{
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
 :5318 {
 	encode zstd gzip
 	# The security headers production sends too.

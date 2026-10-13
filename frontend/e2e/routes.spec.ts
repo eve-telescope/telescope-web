@@ -26,7 +26,7 @@ test('serves the static files the site had', async ({ request }) => {
   for (const [path, type] of [
     ['/robots.txt', 'text/plain'],
     ['/site.webmanifest', 'application/manifest+json'],
-    ['/favicon.ico', 'image/vnd.microsoft.icon'],
+    ['/favicon.ico', 'image/x-icon'],
     ['/favicon-16.png', 'image/png'],
     ['/favicon-32.png', 'image/png'],
     ['/apple-touch-icon.png', 'image/png'],

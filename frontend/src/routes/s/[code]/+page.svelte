@@ -27,7 +27,16 @@
     pilotsCopy.copy(pilotsText(share.pilots), (text) => navigator.clipboard.writeText(text));
   }
 
-  onMount(openInApp);
+  // The app is tried once the page has loaded, as the Vue page did after
+  // mounting; a deep link before that keeps the browser loading.
+  onMount(() => {
+    if (document.readyState === 'complete') {
+      openInApp();
+      return;
+    }
+    window.addEventListener('load', openInApp, { once: true });
+    return () => window.removeEventListener('load', openInApp);
+  });
 </script>
 
 <PageHead title="{share.pilotCount} Pilots Shared" />
