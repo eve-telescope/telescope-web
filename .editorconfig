@@ -11,8 +11,8 @@ trim_trailing_whitespace = true
 [*.md]
 trim_trailing_whitespace = false
 
-[*.{yml,yaml}]
+[*.{yml,yaml,json,ts,js,svelte,css,html}]
 indent_size = 2
 
-[compose.yaml]
-indent_size = 4
+[{Caddyfile,Caddyfile.*}]
+indent_style = tab

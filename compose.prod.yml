@@ -1,0 +1,58 @@
+# Production on the shared server (TimKunze96/infra): only the api and the
+# frontend, from prebuilt images tagged with the commit (IMAGE_TAG in .env).
+# Postgres and Caddy are the server's; both containers join its external
+# `web` network, where Caddy reaches them as telescope-api and
+# telescope-frontend (deploy/Caddyfile: eve-telescope.com and the
+# websocket host ws.eve-telescope.com). Run from /opt/telescope:
+#   docker compose -f compose.prod.yml up -d
+#
+# .env holds DATABASE_URL (the shared Postgres), IMAGE_TAG,
+# EVE_CLIENT_ID and EVE_CLIENT_SECRET (the CCP application),
+# PUSHER_APP_SECRET, and optionally PUSHER_APP_KEY (it defaults to the key
+# every desktop client ships with and must never change).
+
+name: telescope
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  api:
+    image: telescope-api:${IMAGE_TAG:?set IMAGE_TAG in .env}
+    container_name: telescope-api
+    env_file: .env
+    environment:
+      BIND_ADDR: 0.0.0.0:3000
+      APP_URL: https://eve-telescope.com
+      EVE_CALLBACK: https://eve-telescope.com/eve/callback
+      # No demo login on the live site.
+      DEMO_ENABLED: "false"
+      # The hourly tasks (affiliations, expired access, old scans) never
+      # ran on the old server; they stay off until the owner decides
+      # (FIXES.md, needs owner decision).
+      SCHEDULER_ENABLED: "false"
+      RUST_LOG: ${RUST_LOG:-info}
+    networks:
+      - web
+    restart: unless-stopped
+    logging: *logging
+
+  frontend:
+    image: telescope-frontend:${IMAGE_TAG:?set IMAGE_TAG in .env}
+    container_name: telescope-frontend
+    environment:
+      AXUM_URL: http://telescope-api:3000
+      ORIGIN: https://eve-telescope.com
+    depends_on:
+      - api
+    networks:
+      - web
+    restart: unless-stopped
+    logging: *logging
+
+networks:
+  web:
+    external: true

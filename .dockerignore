@@ -1,0 +1,9 @@
+target
+frontend
+node_modules
+tests
+deploy
+scripts
+.git
+.claude
+*.md

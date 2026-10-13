@@ -1,0 +1,40 @@
+# The production site blocks for the shared Caddy. Same routing as
+# Caddyfile.dev: keep the path list in sync with frontend/proxy-paths.ts.
+# Backend paths (the desktop clients' API, the EVE login redirect, channel
+# auth and the websocket at /app/<key>), and every request that is not a
+# GET or HEAD, go to the api; pages and static files to SvelteKit.
+
+eve-telescope.com {
+	encode zstd gzip
+	header {
+		X-Frame-Options SAMEORIGIN
+		X-XSS-Protection "1; mode=block"
+		X-Content-Type-Options nosniff
+	}
+	# A shared scan holds up to 500 000 characters.
+	request_body {
+		max_size 8MB
+	}
+
+	@axum {
+		path /api/* /up /eve /sanctum/* /storage/* /broadcasting/auth /app/*
+	}
+	reverse_proxy @axum telescope-api:3000
+
+	@mutation {
+		not method GET HEAD
+	}
+	reverse_proxy @mutation telescope-api:3000
+
+	reverse_proxy telescope-frontend:3000
+}
+
+www.eve-telescope.com {
+	redir https://eve-telescope.com{uri} permanent
+}
+
+# The Pusher protocol websocket every desktop client connects to
+# (wss://ws.eve-telescope.com:443/app/<key>). Everything goes to the api.
+ws.eve-telescope.com {
+	reverse_proxy telescope-api:3000
+}
