@@ -1,4 +1,4 @@
-//! Who is asking: desktop clients with Sanctum personal access tokens
+//! Who is asking: desktop clients with personal access tokens
 //! (`tokens`), the website with its session cookie (`session`), the EVE
 //! SSO login that hands out both (`sso`, `login`).
 

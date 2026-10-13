@@ -1,8 +1,7 @@
-//! The schedule of routes/console.php, hourly at minute 0 UTC: the
-//! corporation and alliance refresh from ESI (RefreshAffiliations),
-//! `network:purge-expired-access` and `scans:purge`. Only with
-//! SCHEDULER_ENABLED; the old server never ran them (FIXES.md, needs owner
-//! decision). The tasks also run once as commands (src/bin).
+//! The hourly tasks, at minute 0 UTC: the corporation and alliance
+//! refresh from ESI, `network:purge-expired-access` and `scans:purge`.
+//! Only with SCHEDULER_ENABLED. The tasks also run once as commands
+//! (src/bin).
 
 use std::time::Duration as StdDuration;
 
@@ -18,7 +17,7 @@ pub fn next_hour(now: OffsetDateTime) -> OffsetDateTime {
 }
 
 /// `scans:purge`: deletes the scans older than `days` days; 0 keeps them
-/// all, as the setting always promised (FIXES.md).
+/// all.
 pub async fn purge_scans(pool: &PgPool, now: OffsetDateTime, days: i64) -> sqlx::Result<u64> {
     if days <= 0 {
         return Ok(0);
@@ -72,7 +71,7 @@ pub fn purge_expired_access_report(count: u64) -> String {
     format!("Purged {count} expired network access entries.")
 }
 
-/// Runs every task of routes/console.php once.
+/// Runs every hourly task once.
 pub async fn run_hourly(state: &AppState) {
     let updated = crate::affiliations::refresh_all(state).await;
     tracing::info!(updated, "affiliations refreshed");
@@ -89,7 +88,7 @@ pub async fn run_hourly(state: &AppState) {
 }
 
 /// Starts the hourly loop: housekeeping (expired website sessions)
-/// always, the tasks of routes/console.php when the schedule is on.
+/// always, the hourly tasks when the schedule is on.
 pub fn spawn(state: AppState) {
     if !state.config.scheduler_enabled {
         tracing::info!("the hourly tasks are off (SCHEDULER_ENABLED)");

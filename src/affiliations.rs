@@ -1,9 +1,8 @@
 //! Which corporation and alliance each pilot belongs to, from ESI: at
-//! login (EveAuthService) and hourly for everyone (RefreshAffiliations).
-//! Corporations and alliances are fetched when they are missing or were
-//! last fetched more than 24 hours ago (or never, FIXES.md). A pilot is
-//! only pointed at a corporation or alliance that is stored, so an ESI
-//! failure never breaks the foreign keys (FIXES.md).
+//! login and hourly for everyone. Corporations and alliances are fetched
+//! when they are missing or were last fetched more than 24 hours ago (or
+//! never). A pilot is only pointed at a corporation or alliance that is
+//! stored, so an ESI failure never breaks the foreign keys.
 
 use sqlx::PgPool;
 use time::{Duration, OffsetDateTime};
@@ -74,7 +73,7 @@ pub async fn ensure_corporation(
     if row.is_none_or(|last_updated| is_stale(last_updated, now))
         && let Some(corporation) = esi.corporation(id).await
     {
-        // An alliance that cannot be stored is left out (FIXES.md).
+        // An alliance that cannot be stored is left out.
         let alliance_id = match corporation.alliance_id {
             Some(alliance) if ensure_alliance(pool, esi, alliance, now).await? => Some(alliance),
             _ => None,
@@ -101,7 +100,7 @@ pub async fn ensure_corporation(
 }
 
 /// The corporation and alliance of an affiliation, as far as they are
-/// stored (the alliance first, as Laravel fetched them).
+/// stored (the alliance is fetched first).
 pub async fn resolve(
     pool: &PgPool,
     esi: &EsiClient,
@@ -120,7 +119,7 @@ pub async fn resolve(
 }
 
 /// The affiliation of one character at login; `None` when ESI did not
-/// answer (the user keeps what it had, FIXES.md).
+/// answer (the user keeps what it had).
 pub async fn for_character(
     pool: &PgPool,
     esi: &EsiClient,

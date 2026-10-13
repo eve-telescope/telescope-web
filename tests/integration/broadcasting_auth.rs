@@ -1,4 +1,4 @@
-//! `/broadcasting/auth` (routes/channels.php): a user who may see an intel
+//! `/broadcasting/auth`: a user who may see an intel
 //! network gets the signature for its private channel,
 //! `<key>:<hex HMAC-SHA256(secret, "<socket_id>:<channel>")>`, which the
 //! websocket server checks on subscribe.
@@ -9,7 +9,7 @@ use hmac::{Hmac, KeyInit, Mac};
 use serde_json::json;
 use sha2::Sha256;
 
-use crate::common::factories::{CORPORATION, NewUser, USER};
+use crate::common::factories::{ALLIANCE, CORPORATION, NewUser, USER};
 use crate::common::{HOST, PUSHER_KEY, PUSHER_SECRET, TestApp, assert_json_eq, header_map};
 
 /// The signature the websocket server expects.
@@ -76,9 +76,56 @@ async fn signs_the_channel_of_a_network_the_user_may_see() {
         &response.json(),
     );
     assert_eq!(response.header("access-control-allow-origin"), Some("*"));
+    assert_eq!(response.header("content-type"), Some("application/json"));
 }
 
-/// Viewers and members of the user's corporation may listen too.
+/// The signature for a known secret, socket and channel, written out.
+#[tokio::test]
+async fn the_signature_is_the_hmac_of_socket_and_channel() {
+    let mut s = setup().await;
+    assert_eq!(s.network, 1);
+    s.app
+        .reconfigure(|config| config.pusher.secret = "reference-reverb-secret".to_owned());
+    let response = auth(
+        &s.app,
+        Some(&s.owner),
+        "socket_id=123.456&channel_name=private-intel-network.1",
+    )
+    .await;
+    response.assert_status(200);
+    assert_eq!(
+        response.text(),
+        r#"{"auth":"04pcwy13bvcyjoio6mf6:ee15aa967fba401c006ef004e5296e20049206b0d8a2275114ecde47f8c7e884"}"#
+    );
+}
+
+/// The form works without an Accept header too.
+#[tokio::test]
+async fn answers_json_without_an_accept_header() {
+    let s = setup().await;
+    let channel = format!("private-intel-network.{}", s.network);
+    let response = s
+        .app
+        .request(
+            Method::POST,
+            "/broadcasting/auth",
+            header_map(&[
+                ("host", HOST),
+                ("content-type", "application/x-www-form-urlencoded"),
+                ("authorization", &format!("Bearer {}", s.owner)),
+            ]),
+            Body::from(format!("socket_id=123.456&channel_name={channel}")),
+        )
+        .await;
+    response.assert_status(200);
+    assert_json_eq(
+        &json!({ "auth": signature("123.456", &channel) }),
+        &response.json(),
+    );
+}
+
+/// Viewers, members of the user's corporation and of its alliance may
+/// listen too.
 #[tokio::test]
 async fn any_permission_may_listen() {
     let s = setup().await;
@@ -95,15 +142,38 @@ async fn any_permission_may_listen() {
     s.app
         .grant(s.network, CORPORATION, 98_000_001, "viewer", false, None)
         .await;
-    let token = s.app.token(&mate).await;
+    s.app.create_alliance(99_000_001, "Alliance", "ALLY").await;
+    s.app
+        .create_corporation(98_000_002, "Ally Corp", "ALLY", Some(99_000_001))
+        .await;
+    let ally = s
+        .app
+        .create_user(NewUser {
+            corporation_id: Some(98_000_002),
+            alliance_id: Some(99_000_001),
+            ..NewUser::default()
+        })
+        .await;
+    s.app
+        .grant(s.network, ALLIANCE, 99_000_001, "member", false, None)
+        .await;
+    let viewer = s.app.user().await;
+    s.app.grant_user(s.network, &viewer, "viewer").await;
     let channel = format!("private-intel-network.{}", s.network);
-    let response = auth(
-        &s.app,
-        Some(&token),
-        &format!("socket_id=1.2&channel_name={channel}"),
-    )
-    .await;
-    response.assert_status(200);
+    for user in [&mate, &ally, &viewer] {
+        let token = s.app.token(user).await;
+        let response = auth(
+            &s.app,
+            Some(&token),
+            &format!("socket_id=1.2&channel_name={channel}"),
+        )
+        .await;
+        response.assert_status(200);
+        assert_json_eq(
+            &json!({ "auth": signature("1.2", &channel) }),
+            &response.json(),
+        );
+    }
 }
 
 #[tokio::test]
@@ -138,9 +208,10 @@ async fn others_may_not_listen() {
     }
     let without_channel = auth(&s.app, Some(&s.owner), "socket_id=1.2").await;
     without_channel.assert_status(403);
+    assert_json_eq(&json!({ "message": "" }), &without_channel.json());
 }
 
-/// FIXES.md: a TypeError (500) in Laravel.
+/// A channel whose network id is not a number is forbidden.
 #[tokio::test]
 async fn a_malformed_network_id_is_forbidden() {
     let s = setup().await;
@@ -159,8 +230,7 @@ async fn a_malformed_network_id_is_forbidden() {
     }
 }
 
-/// FIXES.md: pusher-php-server threw on a socket id it could not read
-/// (500), or signed a missing one.
+/// A missing or malformed socket id is forbidden, never signed.
 #[tokio::test]
 async fn a_malformed_socket_id_is_forbidden() {
     let s = setup().await;
@@ -174,9 +244,8 @@ async fn a_malformed_socket_id_is_forbidden() {
     }
 }
 
-/// FIXES.md (deliberate): presence channels are refused; Laravel signed
-/// them (and any channel without the `private-` prefix) as presence
-/// channels.
+/// Only private channels are signed: presence channels and channels
+/// without the `private-` prefix are refused.
 #[tokio::test]
 async fn a_presence_channel_is_refused() {
     let s = setup().await;

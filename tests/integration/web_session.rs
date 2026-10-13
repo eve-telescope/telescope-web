@@ -1,6 +1,5 @@
-//! The website's sign-in (FIXES.md, deliberate changes): the EVE login
-//! starts a `telescope_session` cookie for 30 days; the pages share the
-//! signed-in user as `auth.user`.
+//! The website's sign-in: the EVE login starts a `telescope_session`
+//! cookie for 30 days; the pages share the signed-in user as `auth.user`.
 
 use serde_json::{Value, json};
 use time::Duration;

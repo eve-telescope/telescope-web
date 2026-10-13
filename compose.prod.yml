@@ -46,9 +46,8 @@ services:
       PUSHER_APP_SECRET: ${PUSHER_APP_SECRET:-}
       SESSION_LIFETIME_DAYS: ${SESSION_LIFETIME_DAYS:-}
       SCAN_RETENTION_DAYS: ${SCAN_RETENTION_DAYS:-}
-      # The hourly tasks (affiliations, expired access, old scans) never
-      # ran on the old server; they stay off until the owner decides
-      # (FIXES.md, needs owner decision).
+      # The hourly tasks (affiliations, expired access, old scans) are off
+      # unless enabled in Coolify.
       SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-false}
       # No demo login on the live site.
       DEMO_ENABLED: ${DEMO_ENABLED:-false}

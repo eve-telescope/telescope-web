@@ -1,5 +1,4 @@
-//! tests/Feature/NetworkScanTest.php: sharing local and d-scans and the
-//! paged scan history, newest first.
+//! Sharing local and d-scans and the paged scan history, newest first.
 
 use serde_json::{Value, json};
 use time::Duration;
@@ -14,7 +13,7 @@ struct Setup {
     token: String,
 }
 
-/// The PHP suite's `beforeEach`.
+/// An owner of one network, with a token.
 async fn setup() -> Setup {
     let app = TestApp::new().await;
     app.create_alliance(99_000_001, "Test Alliance", "TSTA")
@@ -282,21 +281,29 @@ async fn paginates_scan_history() {
     assert_eq!(body["from"], 21);
     assert_eq!(body["to"], 25);
     assert_eq!(body["prev_page_url"], format!("{path}?page=1"));
+    assert_eq!(body["next_page_url"], Value::Null);
+    assert_json_eq(
+        &json!([
+            { "url": format!("{path}?page=1"), "label": "&laquo; Previous", "page": 1, "active": false },
+            { "url": format!("{path}?page=1"), "label": "1", "page": 1, "active": false },
+            { "url": format!("{path}?page=2"), "label": "2", "page": 2, "active": true },
+            { "url": null, "label": "Next &raquo;", "page": null, "active": false },
+        ]),
+        &body["links"],
+    );
 }
 
-// ---------------------------------------------------------------------------
-// Beyond the PHP suite.
-// ---------------------------------------------------------------------------
-
 /// A page that is not a positive number is the first page; one past the
-/// end is empty.
+/// end is empty but still links back. Other query parameters are not
+/// carried into the links.
 #[tokio::test]
-async fn reads_the_page_like_laravel() {
+async fn reads_the_page_number_leniently() {
     let s = setup().await;
     s.app
         .create_scan(s.network, s.owner.id, "local", "Only scan")
         .await;
-    for page in ["abc", "0", "-1", "1.5"] {
+    let path = format!("{APP_URL}/api/networks/{}/scans", s.network);
+    for page in ["abc", "0&other=1", "-1", "1.5"] {
         let response = s
             .app
             .get_json(
@@ -306,6 +313,11 @@ async fn reads_the_page_like_laravel() {
             .await;
         response.assert_status(200);
         assert_eq!(response.json()["current_page"], 1, "{page}");
+        assert_eq!(
+            response.json()["first_page_url"],
+            format!("{path}?page=1"),
+            "{page}"
+        );
     }
     let past = s
         .app
@@ -314,12 +326,29 @@ async fn reads_the_page_like_laravel() {
             &format!("/api/networks/{}/scans?page=7", s.network),
         )
         .await;
-    let body = past.json();
-    assert_eq!(body["current_page"], 7);
-    assert_json_eq(&json!([]), &body["data"]);
-    assert_eq!(body["from"], Value::Null);
-    assert_eq!(body["to"], Value::Null);
-    assert_eq!(body["last_page"], 1);
+    past.assert_status(200);
+    assert_json_eq(
+        &json!({
+            "current_page": 7,
+            "data": [],
+            "first_page_url": format!("{path}?page=1"),
+            "from": null,
+            "last_page": 1,
+            "last_page_url": format!("{path}?page=1"),
+            "links": [
+                { "url": format!("{path}?page=6"), "label": "&laquo; Previous", "page": 6, "active": false },
+                { "url": format!("{path}?page=1"), "label": "1", "page": 1, "active": false },
+                { "url": null, "label": "Next &raquo;", "page": null, "active": false },
+            ],
+            "next_page_url": null,
+            "path": path,
+            "per_page": 20,
+            "prev_page_url": format!("{path}?page=6"),
+            "to": null,
+            "total": 1,
+        }),
+        &past.json(),
+    );
 }
 
 #[tokio::test]
@@ -350,8 +379,8 @@ async fn shows_one_scan() {
     );
 }
 
-/// A scan of another network is not found, after the network is
-/// authorized, with Laravel's empty message.
+/// A scan of another network is not found, with an empty message, once
+/// the network is authorized; an outsider is refused first.
 #[tokio::test]
 async fn a_scan_of_another_network_is_not_found() {
     let s = setup().await;
@@ -369,6 +398,26 @@ async fn a_scan_of_another_network_is_not_found() {
         .await;
     response.assert_status(404);
     assert_json_eq(&json!({ "message": "" }), &response.json());
+    let outsider = s.app.user().await;
+    let outsider_token = s.app.token(&outsider).await;
+    let own_scan = s
+        .app
+        .create_scan(s.network, s.owner.id, "local", "Here")
+        .await;
+    for id in [scan, own_scan] {
+        let refused = s
+            .app
+            .get_json(
+                &outsider_token,
+                &format!("/api/networks/{}/scans/{id}", s.network),
+            )
+            .await;
+        refused.assert_status(403);
+        assert_json_eq(
+            &json!({ "message": "This action is unauthorized." }),
+            &refused.json(),
+        );
+    }
 }
 
 /// Every whitespace-only text is empty and so missing.
@@ -388,4 +437,76 @@ async fn a_blank_text_is_missing() {
         response.json()["errors"]["raw_text"],
         json!(["The raw text field is required."])
     );
+}
+
+#[tokio::test]
+async fn an_empty_history_is_one_empty_page() {
+    let s = setup().await;
+    let response = s
+        .app
+        .get_json(&s.token, &format!("/api/networks/{}/scans", s.network))
+        .await;
+    response.assert_status(200);
+    let path = format!("{APP_URL}/api/networks/{}/scans", s.network);
+    assert_json_eq(
+        &json!({
+            "current_page": 1,
+            "data": [],
+            "first_page_url": format!("{path}?page=1"),
+            "from": null,
+            "last_page": 1,
+            "last_page_url": format!("{path}?page=1"),
+            "links": [
+                { "url": null, "label": "&laquo; Previous", "page": null, "active": false },
+                { "url": format!("{path}?page=1"), "label": "1", "page": 1, "active": true },
+                { "url": null, "label": "Next &raquo;", "page": null, "active": false },
+            ],
+            "next_page_url": null,
+            "path": path,
+            "per_page": 20,
+            "prev_page_url": null,
+            "to": null,
+            "total": 0,
+        }),
+        &response.json(),
+    );
+}
+
+#[tokio::test]
+async fn a_missing_scan_is_not_found() {
+    let s = setup().await;
+    let response = s
+        .app
+        .get_json(&s.token, &format!("/api/networks/{}/scans/999", s.network))
+        .await;
+    response.assert_status(404);
+    assert_json_eq(
+        &json!({ "message": "No query results for model [App\\Models\\NetworkScan] 999" }),
+        &response.json(),
+    );
+}
+
+#[tokio::test]
+async fn rejects_a_long_solar_system_with_the_type() {
+    let s = setup().await;
+    let response = s
+        .app
+        .post_json(
+            &s.token,
+            &format!("/api/networks/{}/scans", s.network),
+            &json!({ "scan_type": "invalid", "raw_text": "test", "solar_system": "x".repeat(256) }),
+        )
+        .await;
+    response.assert_status(422);
+    assert_json_eq(
+        &json!({
+            "message": "The selected scan type is invalid. (and 1 more error)",
+            "errors": {
+                "scan_type": ["The selected scan type is invalid."],
+                "solar_system": ["The solar system field must not be greater than 255 characters."],
+            },
+        }),
+        &response.json(),
+    );
+    assert_eq!(s.app.count("network_scans").await, 0);
 }

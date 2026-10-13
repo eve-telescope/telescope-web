@@ -1,4 +1,4 @@
-//! The local demo login (FIXES.md, deliberate changes): with
+//! The local demo login: with
 //! DEMO_ENABLED, `/demo-login` signs in as the demo pilot without EVE
 //! SSO; `seed_demo` fills its sample networks.
 

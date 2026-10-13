@@ -42,15 +42,15 @@ pub struct EveConfig {
     pub callback_url: String,
 }
 
-/// The Pusher protocol server (the replacement of Reverb).
+/// The Pusher protocol server.
 #[derive(Debug, Clone)]
 pub struct PusherConfig {
-    /// `PUSHER_APP_ID` (or `REVERB_APP_ID`).
+    /// `PUSHER_APP_ID`.
     pub app_id: String,
-    /// `PUSHER_APP_KEY` (or `REVERB_APP_KEY`): every desktop client ships
+    /// `PUSHER_APP_KEY`: every desktop client ships
     /// with it, so it never changes.
     pub key: String,
-    /// `PUSHER_APP_SECRET` (or `REVERB_APP_SECRET`): signs channel
+    /// `PUSHER_APP_SECRET`: signs channel
     /// subscriptions. Only this process signs and checks them, so a
     /// random one is generated when unset.
     pub secret: String,
@@ -87,8 +87,7 @@ pub const DEFAULT_SCAN_RETENTION_DAYS: i64 = 7;
 pub const DEFAULT_SESSION_LIFETIME_DAYS: i64 = 30;
 pub const DEFAULT_DEMO_CHARACTER_ID: i64 = 2_100_000_001;
 
-/// A variable that is set and not empty (`null`, as Laravel's .env files
-/// write it, counts as unset).
+/// A variable that is set and not empty (`null` counts as unset).
 fn env(key: &str) -> Option<String> {
     std::env::var(key)
         .ok()
@@ -146,15 +145,9 @@ impl Config {
                 callback_url: env_or("EVE_CALLBACK", DEFAULT_CALLBACK_URL),
             },
             pusher: PusherConfig {
-                app_id: env("PUSHER_APP_ID")
-                    .or_else(|| env("REVERB_APP_ID"))
-                    .unwrap_or_else(|| DEFAULT_PUSHER_APP_ID.to_owned()),
-                key: env("PUSHER_APP_KEY")
-                    .or_else(|| env("REVERB_APP_KEY"))
-                    .unwrap_or_else(|| DEFAULT_PUSHER_KEY.to_owned()),
-                secret: env("PUSHER_APP_SECRET")
-                    .or_else(|| env("REVERB_APP_SECRET"))
-                    .unwrap_or_else(random_secret),
+                app_id: env("PUSHER_APP_ID").unwrap_or_else(|| DEFAULT_PUSHER_APP_ID.to_owned()),
+                key: env("PUSHER_APP_KEY").unwrap_or_else(|| DEFAULT_PUSHER_KEY.to_owned()),
+                secret: env("PUSHER_APP_SECRET").unwrap_or_else(random_secret),
                 activity_timeout: env_number("PUSHER_ACTIVITY_TIMEOUT", DEFAULT_ACTIVITY_TIMEOUT),
                 ping_interval: Duration::from_secs(env_number(
                     "PUSHER_PING_INTERVAL",

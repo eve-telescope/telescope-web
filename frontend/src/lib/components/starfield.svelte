@@ -1,6 +1,6 @@
 <script lang="ts">
   // The animated starfield behind the pages: random stars, placed in the
-  // browser once the page is mounted, as the Vue pages did.
+  // browser once the page is mounted.
   import { onMount } from 'svelte';
 
   let { count, maxOpacity }: { count: number; maxOpacity: number } = $props();

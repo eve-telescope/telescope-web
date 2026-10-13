@@ -1,5 +1,5 @@
 // The realtime channel as the Tauri desktop clients (v0.2.1 to v0.4.0)
-// used it: laravel-echo with pusher-js 8, private channel auth through
+// use it: laravel-echo with pusher-js 8, private channel auth through
 // `/broadcasting/auth` with the bearer token, and `listen('IntelEntryCreated')`,
 // which only matches the event name `App\Events\IntelEntryCreated`. Runs
 // in node against the composed stack, websocket and API through Caddy.

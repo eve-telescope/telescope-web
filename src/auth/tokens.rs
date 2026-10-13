@@ -1,11 +1,12 @@
-//! Sanctum's personal access tokens, the desktop clients' credential.
+//! Personal access tokens in Sanctum's format, the desktop clients'
+//! credential.
 //!
 //! The plain token is `<id>|<40 random letters and digits><crc32b of
 //! them>`; the table stores the SHA-256 (hex) of the part after the pipe.
 //! A bearer token with a pipe is looked up by its id and compared in
 //! constant time, one without by its hash. A token past its `expires_at`
 //! is refused; every accepted request stamps `last_used_at` (and so
-//! `updated_at`). Rows migrated from Laravel keep working unchanged.
+//! `updated_at`).
 
 use axum::extract::FromRequestParts;
 use axum::http::header;
@@ -26,7 +27,7 @@ pub fn hash(secret: &str) -> String {
     hex::encode(Sha256::digest(secret.as_bytes()))
 }
 
-/// `Str::random($length)`: letters and digits from a CSPRNG.
+/// `length` letters and digits from a CSPRNG.
 pub fn random_string(length: usize) -> String {
     rand::rng()
         .sample_iter(Alphanumeric)
@@ -64,8 +65,8 @@ pub async fn create(
     Ok((id, format!("{id}|{secret}")))
 }
 
-/// The bearer token of a request, as Laravel's `bearerToken()` reads it:
-/// after the last `Bearer `, up to a comma.
+/// The bearer token of a request: after the last `Bearer `, up to a
+/// comma.
 pub fn bearer(parts: &Parts) -> Option<String> {
     let header = parts.headers.get(header::AUTHORIZATION)?.to_str().ok()?;
     let position = header.rfind("Bearer ")?;
@@ -174,7 +175,7 @@ mod tests {
     }
 
     #[test]
-    fn reads_the_bearer_like_laravel() {
+    fn reads_the_bearer_token() {
         let parts = |value: &str| {
             let request = axum::http::Request::builder()
                 .header(header::AUTHORIZATION, value)

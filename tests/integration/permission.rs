@@ -1,11 +1,11 @@
-//! tests/Feature/PermissionTest.php: what viewers, members, managers, the
-//! owner and outsiders may do in a network.
+//! What viewers, members, managers, the owner and outsiders may do in a
+//! network.
 
 use serde_json::json;
 use time::Duration;
 
-use crate::common::TestApp;
 use crate::common::factories::{NewUser, USER};
+use crate::common::{TestApp, assert_json_eq};
 
 struct Setup {
     app: TestApp,
@@ -17,7 +17,8 @@ struct Setup {
     outsider: String,
 }
 
-/// The PHP suite's `beforeEach`.
+/// A network with an owner, a manager, a member and a viewer, and an
+/// outsider without access.
 async fn setup() -> Setup {
     let app = TestApp::new().await;
     app.create_corporation(98_000_001, "Test Corp", "TSTC", None)
@@ -228,12 +229,13 @@ async fn expired_access_is_denied() {
         )
         .await;
     let token = s.app.token(&expired).await;
-    s.app.get_json(&token, &s.path("")).await.assert_status(403);
+    let response = s.app.get_json(&token, &s.path("")).await;
+    response.assert_status(403);
+    assert_json_eq(
+        &json!({ "message": "This action is unauthorized." }),
+        &response.json(),
+    );
 }
-
-// ---------------------------------------------------------------------------
-// Beyond the PHP suite.
-// ---------------------------------------------------------------------------
 
 /// The highest permission of the matching rows wins, and an access that
 /// expires at this very second is already expired.
@@ -283,13 +285,13 @@ async fn the_highest_unexpired_permission_wins() {
 #[tokio::test]
 async fn deleting_needs_the_owner_row() {
     let s = setup().await;
-    s.app
-        .delete_json(&s.member, &s.path(""))
-        .await
-        .assert_status(403);
-    s.app
-        .delete_json(&s.outsider, &s.path(""))
-        .await
-        .assert_status(403);
+    for token in [&s.member, &s.outsider] {
+        let response = s.app.delete_json(token, &s.path("")).await;
+        response.assert_status(403);
+        assert_json_eq(
+            &json!({ "message": "This action is unauthorized." }),
+            &response.json(),
+        );
+    }
     assert_eq!(s.app.count("intel_networks").await, 1);
 }

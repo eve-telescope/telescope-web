@@ -1,4 +1,4 @@
-//! IntelNetworkPolicy: a user's permission in a network is the highest of
+//! A user's permission in a network is the highest of
 //! the unexpired access rows naming their character, corporation or
 //! alliance id (the type is not compared; EVE's id ranges do not overlap).
 //! Deleting a network takes an owner row with the user's character id.

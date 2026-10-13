@@ -1,7 +1,6 @@
-//! tests/Feature/EntitySearchTest.php: finding characters, corporations
-//! and alliances by name or ticker, with the shape the Rust client
-//! deserializes. Plus the search without ESI (FIXES.md), and MySQL's
-//! case and accent insensitive matching.
+//! Finding characters, corporations and alliances by name or ticker, with
+//! the shape the desktop client deserializes: only local rows, matched
+//! without case and accents.
 
 use serde_json::{Value, json};
 
@@ -14,7 +13,7 @@ struct Setup {
     token: String,
 }
 
-/// The PHP suite's `beforeEach`.
+/// A pilot in Karmafleet and Goonswarm.
 async fn setup() -> Setup {
     let app = TestApp::new().await;
     app.create_alliance(99_000_001, "Goonswarm Federation", "CONDI")
@@ -223,12 +222,8 @@ async fn never_returns_fields_that_would_break_rust_deserialization() {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Beyond the PHP suite.
-// ---------------------------------------------------------------------------
-
-/// FIXES.md (deliberate): ESI's search is gone, so a miss is answered
-/// without asking it.
+/// The search reads only local rows, so a miss is answered without
+/// asking ESI.
 #[tokio::test]
 async fn a_query_without_local_matches_asks_nobody() {
     let s = setup().await;
@@ -241,8 +236,8 @@ async fn a_query_without_local_matches_asks_nobody() {
     assert!(s.app.esi.requests().is_empty());
 }
 
-/// MySQL's collation matched without case and accents; `%` and `_` in a
-/// query stay wildcards.
+/// Matching ignores case and accents; `%` and `_` in a query stay
+/// wildcards.
 #[tokio::test]
 async fn matching_ignores_case_and_accents() {
     let s = setup().await;
@@ -279,7 +274,14 @@ async fn matching_ignores_case_and_accents() {
         .app
         .get_json(&s.token, "/api/search?query=%25%25&category=corporation")
         .await;
-    assert_eq!(wildcard.json().as_array().map(Vec::len), Some(2));
+    let ids: Vec<Value> = wildcard
+        .json()
+        .as_array()
+        .expect("results")
+        .iter()
+        .map(|result| result["id"].clone())
+        .collect();
+    assert_eq!(ids, vec![json!(98_000_001), json!(98_000_002)]);
     let underscore = s
         .app
         .get_json(&s.token, "/api/search?query=Pure_&category=corporation")
@@ -305,4 +307,109 @@ async fn returns_at_most_15_per_category() {
     assert_eq!(results.len(), 15);
     assert_eq!(results[0]["id"], 98_100_000);
     assert_eq!(results[14]["id"], 98_100_014);
+}
+
+/// Characters match without case and accents too, and carry their
+/// corporation without an alliance when it has none.
+#[tokio::test]
+async fn characters_match_without_case_and_accents() {
+    let s = setup().await;
+    s.app
+        .create_corporation(98_000_005, "100% Pure_Corp", "PURE", None)
+        .await;
+    let jose = s
+        .app
+        .create_user(NewUser {
+            character_name: Some("José Ørsted".to_owned()),
+            corporation_id: Some(98_000_005),
+            ..NewUser::default()
+        })
+        .await;
+    let accent = s
+        .app
+        .get_json(&s.token, "/api/search?query=jose&category=character")
+        .await;
+    accent.assert_status(200);
+    assert_json_eq(
+        &json!([{
+            "id": jose.character_id,
+            "name": "José Ørsted",
+            "category": "character",
+            "ticker": null,
+            "corporation": { "id": 98_000_005, "name": "100% Pure_Corp", "ticker": "PURE" },
+            "alliance": null,
+        }]),
+        &accent.json(),
+    );
+    let case = s
+        .app
+        .get_json(&s.token, "/api/search?query=tEST+pilot&category=character")
+        .await;
+    assert_eq!(case.json().as_array().map(Vec::len), Some(1));
+    assert_eq!(case.json()[0]["id"], s.user.character_id);
+}
+
+/// Without a category the results come as characters, corporations, then
+/// alliances.
+#[tokio::test]
+async fn all_categories_come_in_order() {
+    let s = setup().await;
+    s.app
+        .create_alliance(99_000_002, "Test Alliance Please Ignore", "TEST")
+        .await;
+    s.app
+        .create_corporation(98_000_002, "Test Corp", "TSTC", Some(99_000_002))
+        .await;
+    let response = s.app.get_json(&s.token, "/api/search?query=Test").await;
+    response.assert_status(200);
+    let test_alliance =
+        json!({ "id": 99_000_002, "name": "Test Alliance Please Ignore", "ticker": "TEST" });
+    assert_json_eq(
+        &json!([
+            {
+                "id": s.user.character_id,
+                "name": "Test Pilot",
+                "category": "character",
+                "ticker": null,
+                "corporation": karmafleet(),
+                "alliance": goonswarm(),
+            },
+            {
+                "id": 98_000_002,
+                "name": "Test Corp",
+                "category": "corporation",
+                "ticker": "TSTC",
+                "corporation": null,
+                "alliance": test_alliance,
+            },
+            {
+                "id": 99_000_002,
+                "name": "Test Alliance Please Ignore",
+                "category": "alliance",
+                "ticker": "TEST",
+                "corporation": null,
+                "alliance": null,
+            },
+        ]),
+        &response.json(),
+    );
+}
+
+#[tokio::test]
+async fn a_query_must_be_one_string() {
+    let s = setup().await;
+    let response = s.app.get_json(&s.token, "/api/search?query[]=ab").await;
+    response.assert_status(422);
+    assert_json_eq(
+        &json!({
+            "message": "The query field must be a string. (and 1 more error)",
+            "errors": {
+                "query": [
+                    "The query field must be a string.",
+                    "The query field must be at least 2 characters.",
+                ],
+            },
+        }),
+        &response.json(),
+    );
 }

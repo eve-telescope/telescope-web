@@ -1,7 +1,7 @@
-//! The broadcast events (app/Events): named by their PHP classes, which
+//! The broadcast events: named `App\Events\<Name>`, which
 //! laravel-echo's `listen('IntelEntryCreated')` expects, with the event's
-//! public properties as a JSON string in `data`. Published right after
-//! the change is stored, the sender's own sockets included.
+//! public properties as a JSON string in `data`. Published right after the
+//! change is stored, the sender's own sockets included.
 
 use serde_json::json;
 
@@ -30,7 +30,7 @@ impl Event {
         }
     }
 
-    /// The event's name and its data, as Laravel's broadcaster sent them.
+    /// The event's name and its data.
     fn name_and_data(&self) -> (&'static str, String) {
         match *self {
             Event::IntelEntryCreated {
@@ -82,7 +82,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn frames_like_reverb() {
+    fn frames_the_events() {
         assert_eq!(
             Event::IntelEntryCreated {
                 network_id: 1,

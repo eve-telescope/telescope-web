@@ -1,6 +1,6 @@
-//! Error answers of the API as Laravel's exception handler gave them:
-//! JSON for clients that ask for it, the error page otherwise, Laravel's
-//! messages for unknown routes and methods.
+//! Error answers of the API: JSON for clients that ask for it, the error
+//! page otherwise, with the messages the clients know for unknown routes
+//! and methods.
 
 use axum::body::Body;
 use axum::http::Method;
@@ -17,12 +17,15 @@ async fn an_unknown_api_route_is_not_found() {
         &json!({ "message": "The route api/nope could not be found." }),
         &json.json(),
     );
+    assert_eq!(json.header("content-type"), Some("application/json"));
+    assert_eq!(json.header("access-control-allow-origin"), Some("*"));
     let page = app.get("/api/nope").await;
     page.assert_status(404);
     assert_eq!(
         page.header("content-type"),
         Some("text/html; charset=utf-8")
     );
+    assert_eq!(page.header("access-control-allow-origin"), Some("*"));
     assert!(page.text().contains("<title>Not Found</title>"));
 }
 
@@ -53,8 +56,7 @@ async fn a_known_route_with_another_method_is_405() {
     assert!(page.text().contains("<title>Method Not Allowed</title>"));
 }
 
-/// FIXES.md (deliberate): compact JSON without escaped slashes, where
-/// Laravel pretty-printed exceptions.
+/// Error answers are compact JSON, without escaped slashes.
 #[tokio::test]
 async fn error_answers_are_compact_json() {
     let app = TestApp::new().await;

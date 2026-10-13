@@ -1,5 +1,4 @@
-//! The broadcast events the PHP suite never covered
-//! (app/Events/IntelEntry*.php, ScanShared.php): each mutation publishes
+//! The broadcast events: each mutation publishes
 //! its event on the network's private channel right after it is stored,
 //! the sender included, and nothing is published when it fails.
 
@@ -162,7 +161,7 @@ async fn nothing_is_published_when_a_mutation_fails() {
     s.client.assert_silent(Duration::from_millis(500)).await;
 }
 
-/// FIXES.md (security): an entry of another network is neither changed
+/// An entry of another network is neither changed
 /// nor announced.
 #[tokio::test]
 async fn a_foreign_entry_is_not_announced() {

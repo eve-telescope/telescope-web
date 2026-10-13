@@ -96,8 +96,8 @@ services:
     environment:
       AXUM_URL: http://api:3000
       ORIGIN: ${ORIGIN:-http://localhost:5318}
-      # adapter-node takes the scheme and host of page URLs (og:url, the
-      # Inertia reload) from the proxy: http://localhost:5318 directly,
+      # adapter-node takes the scheme and host of page URLs (og:url) from
+      # the proxy: http://localhost:5318 directly,
       # https://telescope.test through the portal.
       PROTOCOL_HEADER: x-forwarded-proto
       HOST_HEADER: x-forwarded-host

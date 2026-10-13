@@ -1,10 +1,10 @@
-//! The request rules with Laravel's English messages and its semantics:
+//! The request rules, their English messages and semantics:
 //! `required` stops at a missing, null or empty value; every other rule
 //! skips a field the request did not send and, with `nullable`, a null
 //! one, but judges a null that is not nullable; every failing rule adds
 //! its message, in the order the rules are listed; the answer is 422
 //! `{"message": "<first> (and N more errors)", "errors": {...}}`, whatever
-//! the client accepts (FIXES.md).
+//! the client accepts.
 
 use axum::Json;
 use axum::http::StatusCode;
@@ -37,7 +37,7 @@ impl Errors {
         self.0.iter().any(|(name, _)| name == field)
     }
 
-    /// Laravel's JSON answer of a failed validation.
+    /// The JSON answer of a failed validation.
     pub fn json(&self) -> Value {
         let mut all = self.0.iter().flat_map(|(_, messages)| messages);
         let first = all.next().cloned().unwrap_or_default();
@@ -158,7 +158,7 @@ impl<'a> Validator<'a> {
     }
 }
 
-/// PHP's `is_numeric` for a JSON value.
+/// Whether a JSON value is a number or a numeric string.
 fn numeric(value: &Value) -> Option<f64> {
     match value {
         Value::Number(number) => number.as_f64(),
@@ -175,8 +175,9 @@ fn numeric(value: &Value) -> Option<f64> {
     }
 }
 
-/// PHP's string conversion, for `in` and string lengths.
-fn php_string(value: &Value) -> Option<String> {
+/// A value as a string, for `in` and string lengths (`true` is "1",
+/// `false` and null are empty).
+fn as_text(value: &Value) -> Option<String> {
     match value {
         Value::String(text) => Some(text.clone()),
         Value::Number(number) => Some(number.to_string()),
@@ -186,8 +187,8 @@ fn php_string(value: &Value) -> Option<String> {
     }
 }
 
-/// The value of an integer field: a whole JSON number or the digits PHP's
-/// `filter_var(FILTER_VALIDATE_INT)` accepts (no leading zeros).
+/// The value of an integer field: a whole JSON number or a string of
+/// digits with an optional sign and no leading zeros.
 pub fn integer(value: &Value) -> Option<i64> {
     match value {
         Value::Number(number) => number.as_i64().or_else(|| {
@@ -307,7 +308,7 @@ impl Field<'_, '_> {
         match value {
             Value::Array(items) => Some(items.len() as f64),
             Value::Object(items) => Some(items.len() as f64),
-            other => php_string(other).map(|text| text.chars().count() as f64),
+            other => as_text(other).map(|text| text.chars().count() as f64),
         }
     }
 
@@ -341,7 +342,7 @@ impl Field<'_, '_> {
             |value, _| {
                 !value.is_array()
                     && !value.is_object()
-                    && php_string(value).is_some_and(|text| allowed.contains(&text.as_str()))
+                    && as_text(value).is_some_and(|text| allowed.contains(&text.as_str()))
             },
             |a, _| format!("The selected {a} is invalid."),
         )
@@ -358,7 +359,7 @@ impl Field<'_, '_> {
         )
     }
 
-    /// `date`: an ISO 8601 date of a day that exists (FIXES.md).
+    /// `date`: an ISO 8601 date of a day that exists.
     pub fn date(self) -> Self {
         self.check(
             |value, _| value.as_str().and_then(dates::parse).is_some(),
@@ -366,7 +367,7 @@ impl Field<'_, '_> {
         )
     }
 
-    /// `after:now`, compared like PHP's `strtotime`.
+    /// `after:now`, read leniently (`dates::parse_lenient`).
     pub fn after_now(self) -> Self {
         let now = self.validator.now;
         self.check(

@@ -1,8 +1,8 @@
-//! Shared pilot lists (ShareController): `POST /api/share` and `GET
+//! Shared pilot lists: `POST /api/share` and `GET
 //! /api/share/{code}` for the desktop clients (every version since
 //! v0.1.0, no token), and the share page's props, which count a view.
 //! Codes are 8 random letters and digits, unique and looked up ignoring
-//! case, as MySQL's collation compared them.
+//! case.
 
 use axum::Json;
 use axum::extract::{Path, State};
@@ -36,9 +36,8 @@ fn not_found() -> Response {
     )
 }
 
-/// The pilots a share keeps: trimmed (PHP's `trim`), without empty names
-/// or "0" (`array_filter`), each name once with case (`array_unique`), in
-/// the order sent.
+/// The pilots a share keeps: trimmed, without empty names or "0", each
+/// name once (case sensitive), in the order sent.
 pub fn clean_pilots(pilots: &[Value]) -> Vec<String> {
     let mut kept: Vec<String> = Vec::new();
     for pilot in pilots {

@@ -1,11 +1,10 @@
-//! The EVE login (EveAuthController, EveAuthService) and the local demo
-//! login.
+//! The EVE login and the local demo login.
 //!
 //! `/eve` (`?desktop` for the desktop app) sends the browser to EVE SSO
 //! with a random state, kept with the kind of login in the
-//! `telescope_sso` cookie for this attempt alone (FIXES.md). The callback
+//! `telescope_sso` cookie for this attempt alone. The callback
 //! page's props (`/api/pages/eve/callback`) check the state once (419
-//! "Page Expired" otherwise, FIXES.md), read the character from SSO,
+//! "Page Expired" otherwise), read the character from SSO,
 //! refresh its corporation and alliance from ESI and store the pilot.
 //! A desktop login answers a new "Telescope Desktop" token for the token
 //! page; a website login starts a session and goes home.
@@ -32,7 +31,7 @@ use crate::server::errors;
 use crate::server::pages::shared_props;
 
 pub const STATE_COOKIE: &str = "telescope_sso";
-/// How long a login may take, as Laravel's session lasted.
+/// How long a login may take.
 const STATE_LIFETIME: Duration = Duration::hours(2);
 /// The name of the tokens the desktop login hands out.
 pub const DESKTOP_TOKEN_NAME: &str = "Telescope Desktop";
@@ -122,7 +121,7 @@ async fn complete(
     query: Option<&str>,
 ) -> Result<Response, Response> {
     let input = Input::from_query(query);
-    // Cancelled on EVE's page (FIXES.md).
+    // Cancelled on EVE's page.
     if input.has("error") {
         return Ok(home(state));
     }
@@ -148,7 +147,7 @@ async fn complete(
 }
 
 /// Stores the pilot with its corporation and alliance; when ESI did not
-/// answer, the ones it had stay (FIXES.md).
+/// answer, the ones it had stay.
 async fn store_pilot(
     state: &AppState,
     character: &Character,
@@ -224,8 +223,7 @@ async fn finish(
 }
 
 /// `/api/pages/demo-login[?desktop]`: the end of a login for the demo
-/// pilot, without EVE SSO, when DEMO_ENABLED (FIXES.md, deliberate
-/// changes); not found otherwise.
+/// pilot, without EVE SSO, when DEMO_ENABLED; not found otherwise.
 pub async fn demo(
     State(state): State<AppState>,
     headers: HeaderMap,

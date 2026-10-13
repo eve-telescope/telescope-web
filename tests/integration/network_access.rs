@@ -1,12 +1,12 @@
-//! tests/Feature/NetworkAccessTest.php: granting, listing, changing and
-//! revoking access, always answered with plain types (`character`, not
-//! the PHP class). Plus the fixed unscoped access ids and owner grants
-//! (FIXES.md) and the expiry dates.
+//! Granting, listing, changing and revoking access, always answered with
+//! plain types (`character`, not the stored model class): access ids are
+//! scoped to their network, the owner row cannot be changed, and expiry
+//! dates are ISO 8601 and in the future.
 
 use serde_json::{Value, json};
 use time::macros::datetime;
 
-use crate::common::factories::{NewUser, USER, User};
+use crate::common::factories::{ALLIANCE, CORPORATION, NewUser, USER, User};
 use crate::common::{TestApp, assert_json_eq};
 
 struct Setup {
@@ -17,7 +17,7 @@ struct Setup {
     token: String,
 }
 
-/// The PHP suite's `beforeEach`.
+/// An owner in Test Corp and Test Alliance, with their network.
 async fn setup() -> Setup {
     let app = TestApp::new().await;
     app.create_alliance(99_000_001, "Test Alliance", "TSTA")
@@ -180,7 +180,7 @@ async fn can_grant_alliance_access_and_returns_correct_json_shape() {
 }
 
 #[tokio::test]
-async fn never_returns_php_class_names_in_accessible_type() {
+async fn never_returns_model_class_names_in_accessible_type() {
     let s = setup().await;
     s.app
         .post_json(
@@ -200,7 +200,7 @@ async fn never_returns_php_class_names_in_accessible_type() {
         .get_json(&s.token, &format!("/api/networks/{}", s.network))
         .await;
     response.assert_status(200);
-    // Corporations sort before characters (the PHP class names in order).
+    // Corporations sort before characters (by the stored class name).
     let types: Vec<Value> = response.json()["accesses"]
         .as_array()
         .expect("accesses")
@@ -372,12 +372,8 @@ async fn denies_access_management_to_non_managers() {
     assert_eq!(s.app.count("network_access").await, 2);
 }
 
-// ---------------------------------------------------------------------------
-// Beyond the PHP suite.
-// ---------------------------------------------------------------------------
-
-/// FIXES.md (security): the access id must belong to the network in the
-/// URL. Laravel changed another network's row.
+/// The access id must belong to the network in the URL; another
+/// network's row is not found and stays as it is.
 #[tokio::test]
 async fn updating_an_access_of_another_network_is_not_found() {
     let s = setup().await;
@@ -405,7 +401,7 @@ async fn updating_an_access_of_another_network_is_not_found() {
     );
 }
 
-/// FIXES.md (security).
+/// Revoking another network's access is not found either.
 #[tokio::test]
 async fn revoking_an_access_of_another_network_is_not_found() {
     let s = setup().await;
@@ -425,7 +421,7 @@ async fn revoking_an_access_of_another_network_is_not_found() {
     assert!(s.app.row("network_access", foreign).await.is_some());
 }
 
-/// FIXES.md: a grant may not change the owner's row.
+/// A grant may not change the owner's row, even for a manager.
 #[tokio::test]
 async fn granting_access_to_the_owner_is_forbidden() {
     let s = setup().await;
@@ -520,7 +516,7 @@ async fn an_expiry_is_answered_with_its_offset() {
     assert_eq!(response.json()["expires_at"], "2027-06-01T12:00:00+00:00");
 }
 
-/// FIXES.md: Laravel stored the local time as UTC.
+/// An expiry with an offset is stored as the same moment in UTC.
 #[tokio::test]
 async fn an_expiry_with_an_offset_keeps_its_moment() {
     let s = setup().await;
@@ -549,10 +545,9 @@ async fn an_expiry_with_an_offset_keeps_its_moment() {
     assert_eq!(stored, datetime!(2027-06-01 08:00:00 UTC));
 }
 
-/// FIXES.md (deliberate): ISO 8601 dates only, and in the future. As in
-/// Laravel, `after:now` reads what PHP's `strtotime` reads (relative
-/// words, overflowing days), so a date it can still compare gets one
-/// message, and text it cannot read two.
+/// ISO 8601 dates only, and in the future. The "after now" rule reads
+/// relative words and overflowing days as dates it can compare, so those
+/// get one message, and text it cannot read at all gets two.
 #[tokio::test]
 async fn an_expiry_must_be_an_iso_date() {
     let s = setup().await;
@@ -668,4 +663,528 @@ async fn an_update_changes_only_what_it_sends() {
     cleared.assert_status(200);
     assert_eq!(cleared.json()["permission"], "member");
     assert_eq!(cleared.json()["expires_at"], Value::Null);
+}
+
+/// The list is ordered by type (alliances, corporations, characters) and
+/// then by entity id, not by row id. Lapsed rows are still listed, and a
+/// character nobody knows has no entity.
+#[tokio::test]
+async fn lists_every_access_by_type_then_entity_id() {
+    let s = setup().await;
+    let unknown = s
+        .app
+        .grant(s.network, USER, 90_555_555, "viewer", false, None)
+        .await;
+    let member = s.app.user().await;
+    let member_access = s.app.grant_user(s.network, &member, "member").await;
+    let corporation = s
+        .app
+        .grant(s.network, CORPORATION, 98_000_001, "viewer", false, None)
+        .await;
+    let alliance = s
+        .app
+        .grant(
+            s.network,
+            ALLIANCE,
+            99_000_001,
+            "viewer",
+            false,
+            Some(datetime!(2027-01-01 00:00:00 UTC)),
+        )
+        .await;
+    let lapsed = s.app.user().await;
+    let lapsed_access = s
+        .app
+        .grant(
+            s.network,
+            USER,
+            lapsed.character_id,
+            "member",
+            false,
+            Some(datetime!(2026-10-10 00:00:00 UTC)),
+        )
+        .await;
+    let response = s
+        .app
+        .get_json(&s.token, &format!("/api/networks/{}/access", s.network))
+        .await;
+    response.assert_status(200);
+    assert_eq!(response.header("content-type"), Some("application/json"));
+    assert_json_eq(
+        &json!([
+            {
+                "id": alliance,
+                "accessible_type": "alliance",
+                "accessible_id": 99_000_001,
+                "permission": "viewer",
+                "is_owner": false,
+                "expires_at": "2027-01-01T00:00:00+00:00",
+                "entity": {
+                    "id": 99_000_001,
+                    "name": "Test Alliance",
+                    "type": "alliance",
+                    "ticker": "TSTA",
+                    "corporation": null,
+                    "alliance": null,
+                },
+            },
+            {
+                "id": corporation,
+                "accessible_type": "corporation",
+                "accessible_id": 98_000_001,
+                "permission": "viewer",
+                "is_owner": false,
+                "expires_at": null,
+                "entity": {
+                    "id": 98_000_001,
+                    "name": "Test Corp",
+                    "type": "corporation",
+                    "ticker": "TSTC",
+                    "corporation": null,
+                    "alliance": test_alliance(),
+                },
+            },
+            {
+                "id": s.owner_access,
+                "accessible_type": "character",
+                "accessible_id": s.owner.character_id,
+                "permission": "manager",
+                "is_owner": true,
+                "expires_at": null,
+                "entity": character(&s.owner, test_corp(), test_alliance()),
+            },
+            {
+                "id": member_access,
+                "accessible_type": "character",
+                "accessible_id": member.character_id,
+                "permission": "member",
+                "is_owner": false,
+                "expires_at": null,
+                "entity": character(&member, Value::Null, Value::Null),
+            },
+            {
+                "id": lapsed_access,
+                "accessible_type": "character",
+                "accessible_id": lapsed.character_id,
+                "permission": "member",
+                "is_owner": false,
+                "expires_at": "2026-10-10T00:00:00+00:00",
+                "entity": character(&lapsed, Value::Null, Value::Null),
+            },
+            {
+                "id": unknown,
+                "accessible_type": "character",
+                "accessible_id": 90_555_555,
+                "permission": "viewer",
+                "is_owner": false,
+                "expires_at": null,
+                "entity": null,
+            },
+        ]),
+        &response.json(),
+    );
+}
+
+/// A corporation without an alliance, its pilot, and a character id sent
+/// as text for someone nobody knows: stored as given, answered with plain
+/// numbers.
+#[tokio::test]
+async fn grants_answer_the_entity_as_far_as_it_is_known() {
+    let s = setup().await;
+    s.app
+        .create_corporation(98_000_003, "Solo Corp", "SOLO", None)
+        .await;
+    let solo = s
+        .app
+        .create_user(NewUser {
+            corporation_id: Some(98_000_003),
+            ..NewUser::default()
+        })
+        .await;
+    let path = format!("/api/networks/{}/access", s.network);
+    let pilot = s
+        .app
+        .post_json(
+            &s.token,
+            &path,
+            &json!({
+                "accessible_type": "character",
+                "accessible_id": solo.character_id,
+                "accessible_name": solo.character_name,
+                "permission": "viewer",
+                "expires_at": "2027-06-01",
+            }),
+        )
+        .await;
+    pilot.assert_status(201);
+    assert_json_eq(
+        &json!({
+            "id": 2,
+            "accessible_type": "character",
+            "accessible_id": solo.character_id,
+            "permission": "viewer",
+            "is_owner": false,
+            "expires_at": "2027-06-01T00:00:00+00:00",
+            "entity": character(
+                &solo,
+                json!({ "id": 98_000_003, "name": "Solo Corp", "ticker": "SOLO" }),
+                Value::Null,
+            ),
+        }),
+        &pilot.json(),
+    );
+    let corporation = s
+        .app
+        .post_json(
+            &s.token,
+            &path,
+            &json!({
+                "accessible_type": "corporation",
+                "accessible_id": 98_000_003,
+                "accessible_name": "Pure",
+                "permission": "viewer",
+            }),
+        )
+        .await;
+    corporation.assert_status(201);
+    assert_json_eq(
+        &json!({
+            "id": 3,
+            "accessible_type": "corporation",
+            "accessible_id": 98_000_003,
+            "permission": "viewer",
+            "is_owner": false,
+            "expires_at": null,
+            "entity": {
+                "id": 98_000_003,
+                "name": "Solo Corp",
+                "type": "corporation",
+                "ticker": "SOLO",
+                "corporation": null,
+                "alliance": null,
+            },
+        }),
+        &corporation.json(),
+    );
+    let unknown = s
+        .app
+        .post_json(
+            &s.token,
+            &path,
+            &json!({
+                "accessible_type": "character",
+                "accessible_id": "90000555",
+                "accessible_name": "Nobody",
+                "permission": "member",
+            }),
+        )
+        .await;
+    unknown.assert_status(201);
+    assert_json_eq(
+        &json!({
+            "id": 4,
+            "accessible_type": "character",
+            "accessible_id": 90_000_555,
+            "permission": "member",
+            "is_owner": false,
+            "expires_at": null,
+            "entity": null,
+        }),
+        &unknown.json(),
+    );
+    let row = s.app.row("network_access", 4).await.expect("the grant");
+    assert_eq!(
+        json!({
+            "id": 4,
+            "intel_network_id": s.network,
+            "accessible_type": USER,
+            "accessible_id": 90_000_555,
+            "permission": "member",
+            "is_owner": false,
+            "expires_at": null,
+            "created_at": "2026-10-13T08:30:00+00:00",
+            "updated_at": "2026-10-13T08:30:00+00:00",
+        }),
+        row,
+    );
+}
+
+/// Granting again keeps the row's id and `created_at` and moves its
+/// `updated_at`.
+#[tokio::test]
+async fn granting_again_keeps_the_row() {
+    let s = setup().await;
+    let access = s
+        .app
+        .grant(
+            s.network,
+            ALLIANCE,
+            99_000_001,
+            "viewer",
+            false,
+            Some(datetime!(2027-01-01 00:00:00 UTC)),
+        )
+        .await;
+    s.app.clock.advance(time::Duration::hours(1));
+    let response = s
+        .app
+        .post_json(
+            &s.token,
+            &format!("/api/networks/{}/access", s.network),
+            &json!({
+                "accessible_type": "alliance",
+                "accessible_id": 99_000_001,
+                "accessible_name": "TSTA",
+                "permission": "manager",
+            }),
+        )
+        .await;
+    response.assert_status(201);
+    assert_json_eq(
+        &json!({
+            "id": access,
+            "accessible_type": "alliance",
+            "accessible_id": 99_000_001,
+            "permission": "manager",
+            "is_owner": false,
+            "expires_at": null,
+            "entity": {
+                "id": 99_000_001,
+                "name": "Test Alliance",
+                "type": "alliance",
+                "ticker": "TSTA",
+                "corporation": null,
+                "alliance": null,
+            },
+        }),
+        &response.json(),
+    );
+    let row = s.app.row("network_access", access).await.expect("the row");
+    assert_eq!(row["created_at"], "2026-10-13T08:30:00+00:00");
+    assert_eq!(row["updated_at"], "2026-10-13T09:30:00+00:00");
+}
+
+/// Wrong types and values each get their message, all in one answer.
+#[tokio::test]
+async fn validates_the_values_of_a_grant() {
+    let s = setup().await;
+    let path = format!("/api/networks/{}/access", s.network);
+    let response = s
+        .app
+        .post_json(
+            &s.token,
+            &path,
+            &json!({
+                "accessible_type": "ship",
+                "accessible_id": "x1",
+                "accessible_name": ["a"],
+                "permission": "admin",
+            }),
+        )
+        .await;
+    response.assert_status(422);
+    assert_json_eq(
+        &json!({
+            "message": "The selected accessible type is invalid. (and 3 more errors)",
+            "errors": {
+                "accessible_type": ["The selected accessible type is invalid."],
+                "accessible_id": ["The accessible id field must be an integer."],
+                "accessible_name": ["The accessible name field must be a string."],
+                "permission": ["The selected permission is invalid."],
+            },
+        }),
+        &response.json(),
+    );
+    for (expires_at, expected) in [
+        (
+            "not a date",
+            json!({
+                "message": "The expires at field must be a valid date. (and 1 more error)",
+                "errors": { "expires_at": [
+                    "The expires at field must be a valid date.",
+                    "The expires at field must be a date after now.",
+                ] },
+            }),
+        ),
+        (
+            "tomorrow",
+            json!({
+                "message": "The expires at field must be a valid date.",
+                "errors": { "expires_at": ["The expires at field must be a valid date."] },
+            }),
+        ),
+        (
+            "2026-01-01",
+            json!({
+                "message": "The expires at field must be a date after now.",
+                "errors": { "expires_at": ["The expires at field must be a date after now."] },
+            }),
+        ),
+    ] {
+        let response = s
+            .app
+            .post_json(
+                &s.token,
+                &path,
+                &json!({
+                    "accessible_type": "character",
+                    "accessible_id": 90_000_555,
+                    "accessible_name": "Nobody",
+                    "permission": "viewer",
+                    "expires_at": expires_at,
+                }),
+            )
+            .await;
+        response.assert_status(422);
+        assert_json_eq(&expected, &response.json());
+    }
+    assert_eq!(s.app.count("network_access").await, 1);
+}
+
+/// An update sets a new expiry, and an update that changes nothing keeps
+/// `updated_at`; one that changes something moves it.
+#[tokio::test]
+async fn an_update_moves_updated_at_only_on_a_change() {
+    let s = setup().await;
+    let target = s.app.user().await;
+    let access = s.app.grant_user(s.network, &target, "viewer").await;
+    let path = format!("/api/networks/{}/access/{access}", s.network);
+    s.app.clock.advance(time::Duration::hours(1));
+    for body in [json!({}), json!({ "permission": "viewer" })] {
+        let response = s.app.put_json(&s.token, &path, &body).await;
+        response.assert_status(200);
+        assert_json_eq(
+            &json!({
+                "id": access,
+                "accessible_type": "character",
+                "accessible_id": target.character_id,
+                "permission": "viewer",
+                "is_owner": false,
+                "expires_at": null,
+                "entity": character(&target, Value::Null, Value::Null),
+            }),
+            &response.json(),
+        );
+        let row = s.app.row("network_access", access).await.expect("the row");
+        assert_eq!(row["updated_at"], "2026-10-13T08:30:00+00:00", "{body}");
+    }
+    let response = s
+        .app
+        .put_json(
+            &s.token,
+            &path,
+            &json!({ "expires_at": "2027-03-01 08:00:00" }),
+        )
+        .await;
+    response.assert_status(200);
+    assert_json_eq(
+        &json!({
+            "id": access,
+            "accessible_type": "character",
+            "accessible_id": target.character_id,
+            "permission": "viewer",
+            "is_owner": false,
+            "expires_at": "2027-03-01T08:00:00+00:00",
+            "entity": character(&target, Value::Null, Value::Null),
+        }),
+        &response.json(),
+    );
+    let row = s.app.row("network_access", access).await.expect("the row");
+    assert_eq!(row["expires_at"], "2027-03-01T08:00:00+00:00");
+    assert_eq!(row["created_at"], "2026-10-13T08:30:00+00:00");
+    assert_eq!(row["updated_at"], "2026-10-13T09:30:00+00:00");
+}
+
+/// An update is validated, and an access id that names no row is not
+/// found.
+#[tokio::test]
+async fn validates_an_update() {
+    let s = setup().await;
+    let target = s.app.user().await;
+    let access = s.app.grant_user(s.network, &target, "viewer").await;
+    let path = format!("/api/networks/{}/access/{access}", s.network);
+    let invalid = s
+        .app
+        .put_json(
+            &s.token,
+            &path,
+            &json!({ "permission": "admin", "expires_at": "2020-01-01" }),
+        )
+        .await;
+    invalid.assert_status(422);
+    assert_json_eq(
+        &json!({
+            "message": "The selected permission is invalid. (and 1 more error)",
+            "errors": {
+                "permission": ["The selected permission is invalid."],
+                "expires_at": ["The expires at field must be a date after now."],
+            },
+        }),
+        &invalid.json(),
+    );
+    let null = s
+        .app
+        .put_json(&s.token, &path, &json!({ "permission": null }))
+        .await;
+    null.assert_status(422);
+    assert_json_eq(
+        &json!({
+            "message": "The permission field must be a string. (and 1 more error)",
+            "errors": {
+                "permission": [
+                    "The permission field must be a string.",
+                    "The selected permission is invalid.",
+                ],
+            },
+        }),
+        &null.json(),
+    );
+    assert_eq!(
+        s.app.row("network_access", access).await.expect("kept")["permission"],
+        "viewer"
+    );
+    let missing = s
+        .app
+        .put_json(
+            &s.token,
+            &format!("/api/networks/{}/access/999", s.network),
+            &json!({ "permission": "viewer" }),
+        )
+        .await;
+    missing.assert_status(404);
+    assert_json_eq(
+        &json!({ "message": "No query results for model [App\\Models\\NetworkAccess] 999" }),
+        &missing.json(),
+    );
+}
+
+/// A member may not list, change or revoke access.
+#[tokio::test]
+async fn a_member_cannot_list_change_or_revoke_access() {
+    let s = setup().await;
+    let member = s.app.user().await;
+    s.app.grant_user(s.network, &member, "member").await;
+    let viewer = s.app.user().await;
+    let access = s.app.grant_user(s.network, &viewer, "viewer").await;
+    let token = s.app.token(&member).await;
+    let path = format!("/api/networks/{}/access", s.network);
+    let unauthorized = json!({ "message": "This action is unauthorized." });
+    let index = s.app.get_json(&token, &path).await;
+    index.assert_status(403);
+    assert_json_eq(&unauthorized, &index.json());
+    let update = s
+        .app
+        .put_json(
+            &token,
+            &format!("{path}/{access}"),
+            &json!({ "permission": "manager" }),
+        )
+        .await;
+    update.assert_status(403);
+    assert_json_eq(&unauthorized, &update.json());
+    let destroy = s.app.delete_json(&token, &format!("{path}/{access}")).await;
+    destroy.assert_status(403);
+    assert_json_eq(&unauthorized, &destroy.json());
+    let row = s.app.row("network_access", access).await.expect("kept");
+    assert_eq!(row["permission"], "viewer");
 }

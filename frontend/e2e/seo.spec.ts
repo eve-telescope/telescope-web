@@ -1,5 +1,4 @@
-// The <head> of every page, as the Laravel root view had it
-// (resources/views/app.blade.php), now rendered on the server.
+// The <head> of every page, rendered on the server.
 import { expect, test } from '@playwright/test';
 
 import { baseUrl, createShare, resetDatabase, seedDemo } from './helpers.ts';

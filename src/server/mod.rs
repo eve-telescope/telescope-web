@@ -16,9 +16,8 @@ pub mod pages;
 use std::sync::Arc;
 
 use axum::Router;
-use axum::extract::{DefaultBodyLimit, Request};
-use axum::http::{Method, StatusCode, header};
-use axum::middleware::Next;
+use axum::extract::DefaultBodyLimit;
+use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::routing::{delete, get, post, put};
 use sqlx::PgPool;
@@ -102,10 +101,6 @@ fn routes(state: AppState) -> Router {
         .nest("/api", api_router())
         .fallback(errors::not_found)
         .layer(DefaultBodyLimit::max(BODY_LIMIT))
-        .layer(axum::middleware::from_fn_with_state(
-            state.clone(),
-            reload_inertia_requests,
-        ))
         .with_state(state)
 }
 
@@ -184,8 +179,7 @@ async fn tokens_store(
 }
 
 /// `DELETE /api/tokens/{tokenId}`: one of the caller's own tokens; the
-/// same answer whether it existed or not. A non-numeric id is not found
-/// (FIXES.md).
+/// same answer whether it existed or not. A non-numeric id is not found.
 async fn tokens_destroy(
     axum::extract::State(state): axum::extract::State<AppState>,
     caller: crate::auth::tokens::ApiUser,
@@ -206,8 +200,7 @@ async fn tokens_destroy(
     Ok(axum::Json(serde_json::json!({ "message": "Token revoked" })).into_response())
 }
 
-/// `GET /sanctum/csrf-cookie`: 204, no cookies (FIXES.md, deliberate
-/// changes).
+/// `GET /sanctum/csrf-cookie`: 204, no cookies.
 async fn csrf_cookie() -> StatusCode {
     StatusCode::NO_CONTENT
 }
@@ -215,64 +208,4 @@ async fn csrf_cookie() -> StatusCode {
 /// The local disk's routes: nothing is stored there.
 async fn storage() -> Response {
     errors::http_error(StatusCode::NOT_FOUND, "Not Found")
-}
-
-/// Tabs left open on the Laravel site still send Inertia's XHR
-/// (`X-Inertia: true`). A 409 with `X-Inertia-Location` makes Inertia load
-/// that URL in full: the same page for a GET, the page the request came
-/// from for anything else (its Referer, or the home page).
-async fn reload_inertia_requests(
-    axum::extract::State(state): axum::extract::State<AppState>,
-    request: Request,
-    next: Next,
-) -> Response {
-    if !request.headers().contains_key("x-inertia") {
-        return next.run(request).await;
-    }
-    let headers = request.headers();
-    let location = if matches!(*request.method(), Method::GET | Method::HEAD) {
-        let scheme = headers
-            .get("x-forwarded-proto")
-            .and_then(|value| value.to_str().ok())
-            .unwrap_or_else(|| state.config.app_url.split("://").next().unwrap_or("https"));
-        // The host the visitor used: Caddy forwards it.
-        let host = headers
-            .get("x-forwarded-host")
-            .or_else(|| headers.get(header::HOST))
-            .and_then(|value| value.to_str().ok())
-            .unwrap_or_default();
-        let path = request
-            .uri()
-            .path_and_query()
-            .map_or("/", |path| path.as_str());
-        format!("{scheme}://{host}{path}")
-    } else {
-        headers
-            .get(header::REFERER)
-            .and_then(|value| value.to_str().ok())
-            .filter(|referer| !is_foreign_url(referer, headers))
-            .map_or_else(|| format!("{}/", state.config.app_url), str::to_owned)
-    };
-    let mut response = StatusCode::CONFLICT.into_response();
-    if let Ok(location) = location.parse() {
-        response
-            .headers_mut()
-            .insert("x-inertia-location", location);
-    }
-    response
-}
-
-/// Whether a URL (an `Origin` or `Referer`) names a host other than the
-/// one serving the request; an opaque `null` origin counts as foreign.
-fn is_foreign_url(url: &str, headers: &axum::http::HeaderMap) -> bool {
-    let host = headers
-        .get(header::HOST)
-        .and_then(|value| value.to_str().ok())
-        .unwrap_or_default();
-    let authority = url
-        .strip_prefix("https://")
-        .or_else(|| url.strip_prefix("http://"))
-        .and_then(|rest| rest.split('/').next())
-        .unwrap_or_default();
-    authority.is_empty() || !authority.eq_ignore_ascii_case(host)
 }

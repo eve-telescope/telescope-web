@@ -1,5 +1,4 @@
-// The feature cards of the home page, as the Vue page listed them. The
-// icons are lucide paths.
+// The feature cards of the home page. The icons are lucide paths.
 
 export type Feature = { title: string; description: string; color: string; icon: string };
 

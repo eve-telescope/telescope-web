@@ -1,6 +1,6 @@
-// The route contract of the whole stack (Caddy, SvelteKit, Axum) that the
-// PHP suite only touched with "GET / returns 200": pages, static files,
-// the API and the websocket through the proxy, errors and redirects.
+// The route contract of the whole stack (Caddy, SvelteKit, Axum): pages,
+// static files, the API and the websocket through the proxy, errors and
+// redirects.
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 
@@ -8,21 +8,19 @@ import { PUSHER_KEY, baseUrl, createShare, resetDatabase } from './helpers.ts';
 
 test.beforeEach(() => resetDatabase());
 
-// tests/Feature/ExampleTest.php "returns a successful response".
 test('returns a successful response', async ({ request }) => {
   const response = await request.get('/');
   expect(response.status()).toBe(200);
 });
 
 test('redirects trailing slashes on pages', async ({ request }) => {
-  // FIXES.md (deliberate changes): Laravel answered the page itself.
   createShare('ABCDEFGH', ['Pilot One']);
   const response = await request.get('/s/ABCDEFGH/', { maxRedirects: 0 });
   expect(response.status()).toBe(308);
   expect(new URL(response.headers()['location'], response.url()).pathname).toBe('/s/ABCDEFGH');
 });
 
-test('serves the static files the site had', async ({ request }) => {
+test('serves the static files', async ({ request }) => {
   for (const [path, type] of [
     ['/robots.txt', 'text/plain'],
     ['/site.webmanifest', 'application/manifest+json'],
@@ -55,17 +53,7 @@ test('answers the not found page for an unknown page and share', async ({ page }
   }
 });
 
-test('reloads tabs left open on the Laravel site', async ({ request }) => {
-  // FIXES.md (deliberate changes).
-  const response = await request.get('/', {
-    headers: { 'X-Inertia': 'true', 'X-Inertia-Version': 'old' },
-    maxRedirects: 0,
-  });
-  expect(response.status()).toBe(409);
-  expect(response.headers()['x-inertia-location']).toBe(`${baseUrl()}/`);
-});
-
-test('sends the headers nginx sent', async ({ request }) => {
+test('sends the security headers', async ({ request }) => {
   const response = await request.get('/');
   expect(response.headers()['x-frame-options']).toBe('SAMEORIGIN');
   expect(response.headers()['x-content-type-options']).toBe('nosniff');

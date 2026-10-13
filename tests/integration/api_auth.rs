@@ -1,7 +1,7 @@
-//! The token guard the PHP suite faked with `actingAs`: Sanctum personal
-//! access tokens (`<id>|<secret>`, stored as the SHA-256 of the secret),
-//! checked on every request with `last_used_at` stamped, as every desktop
-//! client holds one. And `GET /api/user`.
+//! The token guard: personal access tokens in Sanctum's format
+//! (`<id>|<secret>`, stored as the SHA-256 of the secret), checked on
+//! every request with `last_used_at` stamped, as every desktop client
+//! holds one. And `GET /api/user`.
 
 use axum::body::Body;
 use axum::http::Method;
@@ -42,7 +42,7 @@ async fn answers_the_user_of_the_token() {
         }),
         &response.json(),
     );
-    // Sanctum stamps the token's use (and so its updated_at).
+    // The token's use is stamped (and so its updated_at).
     let row = app
         .row("personal_access_tokens", 1)
         .await
@@ -51,8 +51,8 @@ async fn answers_the_user_of_the_token() {
     assert_eq!(row["updated_at"], "2026-10-13T08:40:00+00:00");
 }
 
-/// A token row written like Sanctum's, with a secret of the form it
-/// creates, signs in: this is what the migrated rows look like.
+/// A token row in Sanctum's format, with a secret of the form it
+/// creates, signs in: the tokens the desktop clients already hold.
 #[tokio::test]
 async fn a_sanctum_token_row_signs_in() {
     let app = TestApp::new().await;
@@ -107,19 +107,27 @@ async fn an_expired_token_is_unauthenticated() {
         .execute(&app.pool)
         .await
         .expect("expiry set");
-    app.get_json(&token, "/api/user").await.assert_status(401);
+    let response = app.get_json(&token, "/api/user").await;
+    response.assert_status(401);
+    assert_json_eq(&json!({ "message": "Unauthenticated." }), &response.json());
+    // A rejected token is kept and not stamped.
+    let row = app
+        .row("personal_access_tokens", 1)
+        .await
+        .expect("the token");
+    assert_eq!(row["last_used_at"], Value::Null);
+    assert_eq!(row["updated_at"], "2026-10-13T08:30:00+00:00");
     sqlx::query("update personal_access_tokens set expires_at = $1")
         .bind(app.now() + Duration::seconds(1))
         .execute(&app.pool)
         .await
         .expect("expiry set");
     app.get_json(&token, "/api/user").await.assert_status(200);
-    // A rejected token is not stamped.
     let row = app
         .row("personal_access_tokens", 1)
         .await
         .expect("the token");
-    assert_ne!(row["last_used_at"], Value::Null);
+    assert_eq!(row["last_used_at"], "2026-10-13T08:30:00+00:00");
 }
 
 #[tokio::test]
@@ -130,7 +138,7 @@ async fn a_guest_gets_401() {
     assert_json_eq(&json!({ "message": "Unauthenticated." }), &response.json());
 }
 
-/// FIXES.md: Laravel answered 500 (no `login` route).
+/// The guard answers JSON whatever the client accepts.
 #[tokio::test]
 async fn a_guest_without_a_json_accept_header_gets_401() {
     let app = TestApp::new().await;

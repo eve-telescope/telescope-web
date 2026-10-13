@@ -1,5 +1,4 @@
-//! jobs/RefreshAffiliations.php, which the PHP suite never covered: every
-//! user's corporation and alliance from the mock ESI, in chunks of 1000,
+//! The affiliation refresh: every user's corporation and alliance from the mock ESI, in chunks of 1000,
 //! fetching corporations and alliances that are missing or older than 24
 //! hours. The hourly task and the `refresh_affiliations` command.
 
@@ -127,7 +126,7 @@ async fn refetches_only_stale_rows() {
     assert_eq!(alliance["name"], "Goonswarm Federation");
 }
 
-/// FIXES.md: Laravel never refreshed a row without `last_updated`.
+/// A row without `last_updated` counts as stale.
 #[tokio::test]
 async fn a_row_never_fetched_is_fetched() {
     let app = TestApp::new().await;
@@ -145,7 +144,7 @@ async fn a_row_never_fetched_is_fetched() {
     assert_eq!(corporation["name"], "Karmafleet");
 }
 
-/// FIXES.md: Laravel's job failed on the foreign key and stopped.
+/// A corporation ESI cannot load is skipped, the rest go on.
 #[tokio::test]
 async fn a_corporation_esi_cannot_load_does_not_stop_the_refresh() {
     let app = TestApp::new().await;

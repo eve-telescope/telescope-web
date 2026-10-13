@@ -1,4 +1,4 @@
-//! The EVE login the PHP suite never covered: `/eve` sends the browser to
+//! The EVE login: `/eve` sends the browser to
 //! EVE SSO, the callback page (`/eve/callback`, its props from
 //! `/api/pages/eve/callback`) checks the state, trades the code for a
 //! token at the mock SSO, verifies it against the mock JWKS, refreshes the
@@ -52,6 +52,16 @@ pub fn esi_knows_the_pilot(app: &TestApp) {
 #[tokio::test]
 async fn redirects_to_eve_sso_with_a_state() {
     let app = TestApp::new().await;
+    let desktop = app.get("/eve?desktop").await;
+    desktop.assert_status(302);
+    assert!(
+        desktop.location().starts_with(&format!(
+            "{}/v2/oauth/authorize/?client_id={EVE_CLIENT_ID}&redirect_uri=https%3A%2F%2Feve-telescope.com%2Feve%2Fcallback&scope=&response_type=code&state=",
+            app.sso.url()
+        )),
+        "{}",
+        desktop.location()
+    );
     let response = app.get("/eve").await;
     response.assert_status(302);
     let location = response.location();
@@ -249,7 +259,7 @@ async fn fresh_corporations_are_not_fetched_again() {
     );
 }
 
-/// FIXES.md: Laravel threw InvalidStateException (500).
+/// A state that does not match the cookie, or no cookie, has expired.
 #[tokio::test]
 async fn a_callback_with_a_wrong_state_has_expired() {
     let app = TestApp::new().await;
@@ -276,7 +286,7 @@ async fn a_replayed_callback_has_expired() {
     replay.assert_status(419);
 }
 
-/// FIXES.md: Laravel tried to trade no code (500).
+/// A login cancelled at EVE SSO goes home without trading a code.
 #[tokio::test]
 async fn a_cancelled_login_goes_home() {
     let app = TestApp::new().await;
@@ -292,7 +302,8 @@ async fn a_cancelled_login_goes_home() {
     assert!(app.sso.requests().is_empty());
 }
 
-/// FIXES.md: Laravel's session kept the desktop flag.
+/// Each login start sets its own mode: a desktop start left behind does
+/// not turn the next website login into a desktop one.
 #[tokio::test]
 async fn a_website_login_after_an_abandoned_desktop_login_signs_in() {
     let app = TestApp::new().await;
@@ -305,7 +316,7 @@ async fn a_website_login_after_an_abandoned_desktop_login_signs_in() {
     assert_eq!(app.count("personal_access_tokens").await, 0);
 }
 
-/// FIXES.md: Laravel saved the user without corporation and alliance.
+/// When ESI fails, the pilot keeps the corporation and alliance it had.
 #[tokio::test]
 async fn an_esi_failure_keeps_the_known_affiliation() {
     let app = TestApp::new().await;
@@ -340,7 +351,7 @@ async fn a_new_pilot_without_an_esi_answer_has_no_affiliation() {
     assert_eq!(user["alliance_id"], Value::Null);
 }
 
-/// FIXES.md: a corporation ESI could not load failed the login (500).
+/// A corporation ESI cannot load does not fail the login.
 #[tokio::test]
 async fn a_corporation_esi_cannot_load_does_not_fail_the_login() {
     let app = TestApp::new().await;

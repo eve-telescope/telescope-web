@@ -1,5 +1,5 @@
-//! tests/Feature/PurgeOldScansTest.php: `scans:purge` deletes shared
-//! scans older than the retention, `--days` overrides it. The command is
+//! The scan purge deletes shared scans older than the retention, `--days`
+//! overrides it. The command is
 //! the `purge_scans` binary and the hourly task; both call
 //! `telescope::scheduler::purge_scans`.
 
@@ -15,7 +15,7 @@ struct Setup {
     network: i64,
 }
 
-/// The PHP suite's `beforeEach`.
+/// One network with its owner.
 async fn setup() -> Setup {
     let app = TestApp::new().await;
     let owner = app.user().await;
@@ -27,7 +27,7 @@ async fn setup() -> Setup {
     }
 }
 
-/// `createScanAt`: a scan created `days_ago` days before now.
+/// A scan created `days_ago` days before now.
 async fn create_scan_at(s: &Setup, text: &str, days_ago: i64) {
     s.app
         .create_scan_at(
@@ -95,11 +95,7 @@ async fn respects_config_value() {
     assert_eq!(texts(&s.app).await, ["Two days old"]);
 }
 
-// ---------------------------------------------------------------------------
-// Beyond the PHP suite.
-// ---------------------------------------------------------------------------
-
-/// FIXES.md: 0 keeps every scan, as the config always said.
+/// A retention of 0 days keeps every scan.
 #[tokio::test]
 async fn zero_days_keeps_every_scan() {
     let s = setup().await;
@@ -123,7 +119,7 @@ async fn zero_days_keeps_every_scan() {
     assert_eq!(texts(&s.app).await.len(), 2);
 }
 
-/// The command's arguments and its line of output, as artisan printed it.
+/// The command's arguments and its line of output.
 #[test]
 fn reads_the_days_argument_and_reports() {
     assert_eq!(parse_days_argument(&[], 7), Ok(7));

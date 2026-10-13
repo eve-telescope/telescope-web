@@ -1,9 +1,8 @@
-//! `/broadcasting/auth` (routes/channels.php): a user who may see an intel
-//! network gets the signature of its private channel for a socket,
+//! `/broadcasting/auth`: a user who may see an intel network gets the
+//! signature of its private channel for a socket,
 //! `<key>:<hex HMAC-SHA256(secret, "<socket_id>:<channel>")>`. Anything
-//! else is 403 with an empty message, as Laravel's AccessDeniedHttpException
-//! answered; presence channels and names without `private-` included
-//! (FIXES.md).
+//! else is 403 with an empty message, presence channels and names without
+//! `private-` included.
 
 use axum::Json;
 use axum::extract::State;

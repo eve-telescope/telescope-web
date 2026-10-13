@@ -1,5 +1,4 @@
-//! The websocket at `/app/<key>`, speaking the Pusher protocol 7 the way
-//! Reverb 1.12 did:
+//! The websocket at `/app/<key>`, speaking the Pusher protocol 7:
 //!
 //! - On connect `pusher:connection_established` with a socket id (two
 //!   random numbers) and the activity timeout; an unknown key gets error
@@ -7,11 +6,11 @@
 //! - `pusher:ping` is answered `{"event":"pusher:pong"}`; `pusher:subscribe`
 //!   checks a private channel's signature (error 4009 when it does not
 //!   match), takes a public channel as it is and refuses presence
-//!   channels (FIXES.md); `pusher:unsubscribe` is silent.
+//!   channels; `pusher:unsubscribe` is silent.
 //! - A message that is not JSON with an `event`, an unknown `pusher:`
 //!   event and a malformed client event get error 4200; a client event
 //!   from a socket not on its channel gets 4009 and one from a member is
-//!   not relayed (FIXES.md). A message over the size limit closes the
+//!   not relayed. A message over the size limit closes the
 //!   connection with 1009.
 //! - A subscribed connection silent for the ping interval is pinged on the
 //!   next tick, and dropped with error 4201 if it is still silent at the
@@ -68,7 +67,7 @@ fn error_frame(code: u16, message: &str) -> String {
     .to_string()
 }
 
-/// A socket id as Reverb made them: two random numbers up to a billion.
+/// A socket id: two random numbers up to a billion.
 fn new_socket_id() -> String {
     let mut random = rand::rng();
     format!(
@@ -170,7 +169,7 @@ impl<'a> Connection<'a> {
                     Err(RecvError::Closed) => return,
                 },
                 _ = ticks.tick() => {
-                    // Reverb only watched connections on a channel.
+                    // Only connections on a channel are watched.
                     if self.channels.is_empty() {
                         continue;
                     }
@@ -224,8 +223,8 @@ impl<'a> Connection<'a> {
         Outcome::Continue
     }
 
-    /// One message; the frame to answer, if any. `Err` is Reverb's
-    /// "Invalid message format".
+    /// One message; the frame to answer, if any. `Err` is "Invalid
+    /// message format".
     fn handle(&mut self, text: &str) -> Result<Option<String>, Invalid> {
         let mut message: Value = serde_json::from_str(text).map_err(|_| Invalid)?;
         let object = message.as_object_mut().ok_or(Invalid)?;

@@ -15,7 +15,7 @@ describe('pageTitle', () => {
 });
 
 describe('pageHead', () => {
-  it('builds the tags of the Laravel root view', () => {
+  it('builds the title, description, OpenGraph and Twitter tags', () => {
     const head = pageHead(new URL('https://eve-telescope.com/s/ABCDEFGH?x=1'), '3 Pilots Shared');
     expect(head).toEqual({
       title: '3 Pilots Shared | Telescope',

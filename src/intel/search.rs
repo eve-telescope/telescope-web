@@ -1,9 +1,7 @@
-//! Entity search (EntitySearchController, SearchResultData): characters
-//! by name, corporations and alliances by name or ticker, up to 15 per
-//! category in id order, matched like MySQL's `utf8mb4_unicode_ci` LIKE
-//! (case and accents ignored, `%` and `_` in the query are wildcards).
-//! A category without a match is empty; ESI's search is not asked any
-//! more (FIXES.md).
+//! Entity search: characters by name, corporations and alliances by name
+//! or ticker, up to 15 per category in id order, matched ignoring case
+//! and accents (`%` and `_` in the query are wildcards). A category
+//! without a match is empty; ESI's search is not asked.
 
 use axum::Json;
 use axum::extract::State;

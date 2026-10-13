@@ -12,7 +12,7 @@ axum = { version = "0.8", features = ["ws"] }
 axum-extra = { version = "0.12", features = ["cookie"] }
 # Sanctum's token checksum (`crc32b` of the random part).
 crc32fast = "1"
-# `Str::slug`'s ASCII transliteration of network names.
+# The ASCII transliteration of network names for their slugs.
 deunicode = "1"
 dotenvy = "0.15"
 form_urlencoded = "1"

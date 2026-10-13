@@ -1,4 +1,4 @@
-//! Intel entries (IntelEntryController): a character, corporation or
+//! Intel entries: a character, corporation or
 //! alliance tagged in a network with a color, a label and notes, one
 //! entry per entity and network. Every change is broadcast on the
 //! network's channel.
@@ -104,8 +104,8 @@ async fn find(pool: &PgPool, id: i64) -> sqlx::Result<Entry> {
     .await
 }
 
-/// A network's entries with their users, in the order MySQL's unique
-/// index returned them: by entity type, then entity id.
+/// A network's entries with their users, by entity type (byte order),
+/// then entity id: the order the API has always answered.
 pub async fn of_network(pool: &PgPool, network_id: i64) -> sqlx::Result<Vec<Value>> {
     let entries: Vec<Entry> = sqlx::query_as(sqlx::AssertSqlSafe(format!(
         "select {COLUMNS} from intel_entries where intel_network_id = $1
@@ -122,8 +122,7 @@ pub async fn of_network(pool: &PgPool, network_id: i64) -> sqlx::Result<Vec<Valu
     Ok(answer)
 }
 
-/// The `{entry}` of a route: it must be one of the network's entries
-/// (FIXES.md).
+/// The `{entry}` of a route: it must be one of the network's entries.
 async fn bind(pool: &PgPool, network: &Network, raw: &str) -> Result<Entry, Response> {
     let entry: Option<Entry> = match super::route_id(raw) {
         Some(id) => sqlx::query_as(sqlx::AssertSqlSafe(format!(
@@ -276,7 +275,7 @@ pub async fn update(
     )
     .await?;
     let mut validator = Validator::new(&input, now);
-    // FIXES.md: the color and the label may be cleared.
+    // The color and the label may be cleared.
     validator
         .field("color")
         .sometimes()

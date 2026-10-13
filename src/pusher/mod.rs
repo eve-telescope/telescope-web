@@ -1,9 +1,9 @@
-//! The realtime channel, the Pusher protocol 7 as Laravel Reverb spoke it
-//! on ws.eve-telescope.com: the websocket at `/app/<key>` (`socket`),
-//! the private channel signatures of `/broadcasting/auth` (`auth`) and
-//! the events the API publishes (`events`). Every desktop client since
-//! v0.2.1 connects with the same key, so the frames match Reverb's byte
-//! for byte (tests/fixtures/golden/pusher).
+//! The realtime channel, the Pusher protocol 7 on ws.eve-telescope.com:
+//! the websocket at `/app/<key>` (`socket`), the private channel
+//! signatures of `/broadcasting/auth` (`auth`) and the events the API
+//! publishes (`events`). Every desktop client since v0.2.1 connects with
+//! the same key and expects these frames byte for byte
+//! (tests/integration/pusher_protocol.rs).
 //!
 //! Delivery: one broadcast bus per process; each connection forwards the
 //! frames of the channels it subscribed to. The api runs as one

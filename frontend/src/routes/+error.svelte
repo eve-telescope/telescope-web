@@ -1,6 +1,6 @@
 <script lang="ts">
   // The error page: the status and its message, like the api's error
-  // page (src/server/error.html, Laravel's minimal error view).
+  // page (src/server/error.html).
   import { page } from '$app/state';
 
   import { errorMessage } from '#lib/errors.ts';

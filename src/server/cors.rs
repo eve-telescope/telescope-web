@@ -1,8 +1,7 @@
-//! CORS on `/api/*` and `/broadcasting/auth`, the paths of
-//! `config/cors.php`: every origin, method and header, no credentials,
+//! CORS on `/api/*` and `/broadcasting/auth`: every origin, method and header, no credentials,
 //! `max-age` 0. The Tauri webview of the desktop clients v0.2.1 to v0.4.0
 //! calls `/broadcasting/auth` cross-origin with a bearer token, so the
-//! preflight must keep answering as it did.
+//! preflight must keep answering the same.
 
 use axum::extract::Request;
 use axum::http::{HeaderMap, HeaderValue, Method, StatusCode, header};

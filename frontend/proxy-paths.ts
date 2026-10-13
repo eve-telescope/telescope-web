@@ -3,8 +3,8 @@
 
 // Paths Axum owns outright: every method proxies to the API. `/api` the
 // desktop clients' JSON API, the page props and the health check; `/up`
-// the health page; `/sanctum/csrf-cookie` and `/storage` the routes
-// Laravel had; `/broadcasting/auth` the channel signatures; `/app` the
+// the health page; `/sanctum/csrf-cookie` and `/storage` two
+// routes older clients may still call; `/broadcasting/auth` the channel signatures; `/app` the
 // Pusher protocol websocket.
 export const axumPrefixes = ['/api', '/up', '/sanctum', '/storage', '/broadcasting/auth', '/app'];
 

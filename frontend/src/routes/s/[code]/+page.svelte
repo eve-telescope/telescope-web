@@ -1,5 +1,5 @@
 <script lang="ts">
-  // A shared pilot list (the Vue Share page): it tries the desktop app
+  // A shared pilot list: it tries the desktop app
   // right away, lists the pilots and offers the download when the app does
   // not answer.
   import { onMount } from 'svelte';
@@ -27,8 +27,7 @@
     pilotsCopy.copy(pilotsText(share.pilots), (text) => navigator.clipboard.writeText(text));
   }
 
-  // The app is tried once the page has loaded, as the Vue page did after
-  // mounting; a deep link before that keeps the browser loading.
+  // The app is tried once the page has loaded; a deep link before that keeps the browser loading.
   onMount(() => {
     if (document.readyState === 'complete') {
       openInApp();

@@ -1,5 +1,4 @@
-//! Rows the API answers with, serialized as the Eloquent models were:
-//! columns in table order, hidden ones left out, timestamps in the model
+//! Rows the API answers with: columns in table order, hidden ones left out, timestamps in the model
 //! form (`dates::model`).
 
 use serde_json::{Value, json};
@@ -7,8 +6,8 @@ use time::OffsetDateTime;
 
 use crate::dates;
 
-/// The PHP class names Eloquent stored as morph types, and the plain
-/// types the API speaks.
+/// The class names stored as morph types (and answered as they are), and
+/// the plain types the API speaks.
 pub const USER_CLASS: &str = "App\\Models\\User";
 pub const CORPORATION_CLASS: &str = "App\\Models\\Corporation";
 pub const ALLIANCE_CLASS: &str = "App\\Models\\Alliance";
@@ -95,7 +94,7 @@ impl User {
     }
 }
 
-/// `{id, name, ticker}` of a corporation or alliance (AffiliationData).
+/// `{id, name, ticker}` of a corporation or alliance.
 pub fn affiliation(id: Option<i64>, name: Option<String>, ticker: Option<String>) -> Value {
     match (id, name, ticker) {
         (Some(id), Some(name), Some(ticker)) => json!({ "id": id, "name": name, "ticker": ticker }),

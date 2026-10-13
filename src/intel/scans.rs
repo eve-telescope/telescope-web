@@ -1,6 +1,5 @@
-//! Shared scans (NetworkScanController, NetworkScanData): local and
-//! d-scans shared with a network, its history paged like Laravel's
-//! LengthAwarePaginator, newest first.
+//! Shared scans: local and d-scans shared with a network, its history
+//! paged (with page links and totals), newest first.
 
 use axum::Json;
 use axum::extract::{OriginalUri, Path, State};
@@ -66,7 +65,7 @@ fn current_page(input: &Input) -> i64 {
         .unwrap_or(1)
 }
 
-/// The pages the links show, Laravel's UrlWindow: all of them when there
+/// The pages the links show: all of them when there
 /// are fewer than 14, else the start, a slider around the current page
 /// and the end, with `...` between.
 fn window(current: i64, last: i64) -> Vec<Option<i64>> {
@@ -285,7 +284,7 @@ mod tests {
     }
 
     #[test]
-    fn windows_the_links_like_laravel() {
+    fn windows_the_page_links() {
         assert_eq!(pages(1, 1), "1");
         assert_eq!(pages(5, 13), "1 2 3 4 5 6 7 8 9 10 11 12 13");
         assert_eq!(pages(1, 93), "1 2 3 4 5 6 7 8 9 10 ... 92 93");

@@ -1,6 +1,6 @@
-//! Shared pilot lists, which the PHP suite never covered: `POST
-//! /api/share` and `GET /api/share/{code}` (every desktop client since
-//! v0.1.0) and the share page's props, which count a view.
+//! Shared pilot lists: `POST /api/share` and `GET /api/share/{code}`
+//! (every desktop client since v0.1.0) and the share page's props, which
+//! count a view.
 
 use axum::body::Body;
 use axum::http::Method;
@@ -43,6 +43,45 @@ async fn creates_a_share_and_answers_its_link() {
     );
     assert_eq!(row["pilot_count"], 4);
     assert_eq!(row["views"], 0);
+    assert_eq!(row["code"], code.as_str());
+    assert_eq!(row["created_at"], "2026-10-13T08:30:00+00:00");
+    assert_eq!(row["updated_at"], "2026-10-13T08:30:00+00:00");
+}
+
+/// Names with accents, quotes, backslashes and slashes come back as
+/// they were stored, in compact JSON without escaped slashes; a long
+/// list comes back whole.
+#[tokio::test]
+async fn fetches_names_as_stored() {
+    let app = TestApp::new().await;
+    app.create_share(
+        "Unic0de1",
+        &[
+            "José Ørsted",
+            "Ålesund Ünïcode",
+            "Back\\slash \"Quote\"",
+            "a/b",
+        ],
+        12,
+    )
+    .await;
+    let response = app
+        .json(Method::GET, "/api/share/Unic0de1", None, None)
+        .await;
+    response.assert_status(200);
+    assert_eq!(
+        response.text(),
+        r#"{"code":"Unic0de1","pilots":["José Ørsted","Ålesund Ünïcode","Back\\slash \"Quote\"","a/b"],"pilotCount":4}"#
+    );
+    let pilots: Vec<String> = (0..60).map(|i| format!("Pilot {i:03}")).collect();
+    let names: Vec<&str> = pilots.iter().map(String::as_str).collect();
+    app.create_share("zyxW9876", &names, 0).await;
+    let response = app.get("/api/pages/s/zyxW9876").await;
+    response.assert_status(200);
+    let share = &response.json()["share"];
+    assert_eq!(share["pilots"], json!(pilots));
+    assert_eq!(share["pilotCount"], 60);
+    assert_eq!(share["views"], 1);
 }
 
 #[tokio::test]
@@ -113,6 +152,14 @@ async fn the_share_page_of_an_unknown_code_is_not_found() {
     let app = TestApp::new().await;
     let response = app.get("/api/pages/s/NOPE0000").await;
     response.assert_status(404);
+    let response = app
+        .get_with("/api/pages/s/NOPE0000", &[("accept", "application/json")])
+        .await;
+    response.assert_status(404);
+    assert_json_eq(
+        &json!({ "message": "No query results for model [App\\Models\\Share]." }),
+        &response.json(),
+    );
 }
 
 #[tokio::test]
@@ -121,22 +168,27 @@ async fn validates_the_pilots() {
     let cases = [
         (
             json!({}),
+            "The pilots field is required.",
             json!({ "pilots": ["The pilots field is required."] }),
         ),
         (
             json!({ "pilots": [] }),
+            "The pilots field is required.",
             json!({ "pilots": ["The pilots field is required."] }),
         ),
         (
             json!({ "pilots": "Pilot One" }),
+            "The pilots field must be an array.",
             json!({ "pilots": ["The pilots field must be an array."] }),
         ),
         (
             json!({ "pilots": (0..501).map(|i| format!("P{i}")).collect::<Vec<_>>() }),
+            "The pilots field must not have more than 500 items.",
             json!({ "pilots": ["The pilots field must not have more than 500 items."] }),
         ),
         (
             json!({ "pilots": ["Fine", null, "x".repeat(101), 5, ""] }),
+            "The pilots.1 field is required. (and 3 more errors)",
             json!({
                 "pilots.1": ["The pilots.1 field is required."],
                 "pilots.2": ["The pilots.2 field must not be greater than 100 characters."],
@@ -145,15 +197,19 @@ async fn validates_the_pilots() {
             }),
         ),
     ];
-    for (body, errors) in cases {
+    for (body, message, errors) in cases {
         let response = create(&app, &body).await;
         response.assert_status(422);
-        assert_json_eq(&errors, &response.json()["errors"]);
+        assert_json_eq(
+            &json!({ "message": message, "errors": errors }),
+            &response.json(),
+        );
     }
     assert_eq!(app.count("shares").await, 0);
 }
 
-/// FIXES.md: Laravel redirected a client that did not ask for JSON.
+/// A client that does not ask for JSON gets the 422 JSON too, not a
+/// redirect.
 #[tokio::test]
 async fn a_failed_validation_answers_422_without_a_json_accept_header() {
     let app = TestApp::new().await;

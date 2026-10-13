@@ -18,7 +18,8 @@ Desktop clients cannot be updated with the site, so their wire format is
 fixed: every API path, status code and JSON shape (key order included),
 Sanctum's token format (`<id>|<secret>`, stored as the SHA-256 of the
 secret), the websocket at `/app/<key>` with the public key
-`04pcwy13bvcyjoio6mf6`, Reverb's frames byte for byte, event names
+`04pcwy13bvcyjoio6mf6`, the Pusher frames byte for byte
+(`tests/integration/pusher_protocol.rs`), event names
 `App\Events\IntelEntryCreated` and friends with JSON-string `data`, and
 CORS on `/api/*` and `/broadcasting/auth` for the Tauri clients. The
 v0.5 client updates entries with PATCH and falls back to PUT on 405, so
@@ -27,18 +28,18 @@ PATCH must stay 405. Change none of it without a client release.
 ## Details that look arbitrary but are not
 
 - A network's entries are listed by entity type then entity id, its
-  access rows by the PHP class name (`collate "C"`) then id: the order
-  MySQL's unique indexes returned. Scans are newest first, ties by id
+  access rows by the class name (`collate "C"`) then entity id: the order
+  the clients have always received. Scans are newest first, ties by id
   descending. Everything else is by id.
-- Freshly created entries and networks answer their keys in the order
-  Laravel set them (`entity_type` first, `id` last); stored rows answer in
-  column order. `serde_json` keeps insertion order (`preserve_order`);
-  use `shift_remove`, never `remove`, on a `Map`.
+- Freshly created entries and networks answer their keys in a fixed order
+  (`entity_type` first, `id` last); stored rows answer in column order.
+  `serde_json` keeps insertion order (`preserve_order`); use
+  `shift_remove`, never `remove`, on a `Map`.
 - Three timestamp forms (`src/dates.rs`): models `.000000Z`, access and
   scan answers `+00:00`.
 - The websocket pings only subscribed connections, after a full ping
   interval of silence, and drops them one tick later with error 4201
-  (`src/pusher/socket.rs`), as Reverb did.
+  (`src/pusher/socket.rs`).
 - adapter-node 6 ignores `ORIGIN` at runtime; the frontend takes the
   scheme from `PROTOCOL_HEADER` (x-forwarded-proto), so Caddy must pass
   the real one.
@@ -69,14 +70,14 @@ PATCH must stay 405. Change none of it without a client release.
 
 ## Layout and commands
 
-- `src/auth/` Sanctum tokens, the website session, EVE SSO and the login;
+- `src/auth/` the API tokens, the website session, EVE SSO and the login;
   `src/intel/` networks, access, entries, scans, lookup and search;
   `src/shares.rs` share links; `src/pusher/` the websocket server, the
   channel signatures and the events; `src/esi.rs` and
   `src/affiliations.rs` ESI and the corporation/alliance refresh;
   `src/github.rs` the latest release; `src/scheduler.rs` the hourly
   tasks; `src/input.rs` and `src/validation.rs` the request input and the
-  rules with Laravel's messages; `src/server/` the router, CORS, error
+  rules and their messages; `src/server/` the router, CORS, error
   answers and the page endpoints (`/api/pages/*`).
 - `migrations/` the schema (never edit an applied migration, sqlx checks
   their checksums); `deploy/` the Caddyfile and the proxy image.
@@ -95,12 +96,3 @@ PATCH must stay 405. Change none of it without a client release.
   `.github/workflows/release.yml`); the proxy has both domains and routes
   ws.eve-telescope.com to the api, which reaches the shared Coolify
   Postgres over the `coolify` network (see the README).
-
-## Legacy reference
-
-Until the rewrite is merged, the Laravel app on `main` is the reference:
-`scripts/laravel-reference/run.sh` runs it in docker (HTTP on 8318,
-Reverb on 8319), `record.py` and `pusher.mjs` record the golden fixtures
-in `tests/fixtures/golden`, `scripts/parity` prints the parity report.
-FIXES.md lists every intended difference and tests/PORTED.md maps the
-PHP tests.

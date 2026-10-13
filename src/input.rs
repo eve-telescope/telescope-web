@@ -1,8 +1,7 @@
 //! The request input as validation sees it: the query string and the body
 //! (JSON or a form) merged into one tree, bracket names (`entity_ids[]`)
-//! nested like PHP's `parse_str`, every string trimmed and empty strings
-//! turned into null, as Laravel's TrimStrings and
-//! ConvertEmptyStringsToNull did. A body that does not parse is no input.
+//! nested (`x[a][]=1`), every string trimmed and empty strings turned
+//! into null. A body that does not parse is no input.
 
 use axum::body::Bytes;
 use axum::extract::{FromRequest, Request};
@@ -10,8 +9,7 @@ use axum::http::header;
 use axum::response::{IntoResponse, Response};
 use serde_json::{Map, Value};
 
-/// Invisible characters that Laravel's `Str::trim` strips on top of
-/// whitespace and NUL.
+/// Invisible characters trimmed on top of whitespace and NUL.
 const INVISIBLE_CHARACTERS: &[char] = &[
     '\u{00AD}',
     '\u{034F}',
@@ -166,7 +164,7 @@ fn insert_segments(slot: &mut Value, segments: &[&str], value: Value) {
         *slot = value;
         return;
     };
-    // PHP keeps `x[0]=a&x[1]=b` a list too.
+    // `x[0]=a&x[1]=b` is a list too.
     let index = first.parse::<usize>().ok();
     if first.is_empty() || index.is_some_and(|index| slot.as_array().map_or(0, Vec::len) == index) {
         if !slot.is_array() {
@@ -179,7 +177,7 @@ fn insert_segments(slot: &mut Value, segments: &[&str], value: Value) {
         return;
     }
     if let Value::Array(items) = slot {
-        // A keyed field after list items: PHP's array keeps both.
+        // A keyed field after list items: the object keeps both.
         let object: Map<String, Value> = items
             .drain(..)
             .enumerate()

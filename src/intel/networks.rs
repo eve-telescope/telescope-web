@@ -1,4 +1,4 @@
-//! Intel networks (IntelNetworkController): the user's networks, a new
+//! Intel networks: the user's networks, a new
 //! one with its owner row, a network with its entries and access, a new
 //! name, and deletion by the owner.
 

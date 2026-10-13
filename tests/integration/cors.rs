@@ -1,4 +1,4 @@
-//! CORS on `/api/*` and `/broadcasting/auth` (config/cors.php): any
+//! CORS on `/api/*` and `/broadcasting/auth`: any
 //! origin, the requested method and headers echoed, `max-age` 0, no
 //! credentials. The Tauri desktop clients call `/broadcasting/auth` from
 //! their webview.
@@ -79,6 +79,12 @@ async fn answers_any_api_preflight() {
     )
     .await;
     unknown.assert_status(204);
+    assert_eq!(unknown.header("access-control-allow-origin"), Some("*"));
+    assert_eq!(
+        unknown.header("access-control-allow-methods"),
+        Some("DELETE")
+    );
+    assert_eq!(unknown.header("access-control-max-age"), Some("0"));
     assert_eq!(
         unknown.header("access-control-allow-headers"),
         Some("x-custom")

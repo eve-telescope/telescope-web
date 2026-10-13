@@ -109,7 +109,7 @@ async fn revoking_someone_elses_token_changes_nothing() {
     assert_eq!(app.count("personal_access_tokens").await, 2);
 }
 
-/// FIXES.md: a TypeError (500) in Laravel.
+/// A token id that is not a number names no token.
 #[tokio::test]
 async fn revoking_a_token_by_a_non_numeric_id_is_not_found() {
     let app = TestApp::new().await;

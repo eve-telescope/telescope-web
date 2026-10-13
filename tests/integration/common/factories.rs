@@ -1,5 +1,4 @@
-//! The rows the PHP tests made with factories and `Model::create`, written
-//! straight to the database. Times come from the app's clock. Character
+//! Test rows, written straight to the database. Times come from the app's clock. Character
 //! ids count up from 90 000 001, so tests are repeatable.
 
 use rand::RngExt;
@@ -39,7 +38,7 @@ impl User {
     }
 }
 
-/// `User::factory()->create([...])`.
+/// A user to create; unset fields get factory defaults.
 #[derive(Debug, Clone, Default)]
 pub struct NewUser {
     pub character_id: Option<i64>,
@@ -67,7 +66,7 @@ pub fn random_string(length: usize) -> String {
         .collect()
 }
 
-/// A Sanctum plain text token for a row id: `<id>|<40 random><crc32b>`,
+/// A plain text token in Sanctum's format for a row id: `<id>|<40 random><crc32b>`,
 /// and the hash the table stores.
 pub fn sanctum_token(id: i64) -> (String, String) {
     let entropy = random_string(40);
@@ -117,7 +116,7 @@ impl TestApp {
         .expect("corporation inserts");
     }
 
-    /// `User::factory()->create([...])`.
+    /// A user with the given fields, the rest made up.
     pub async fn create_user(&self, user: NewUser) -> User {
         let next: i64 =
             sqlx::query_scalar("select coalesce(max(character_id), 90000000) + 1 from users")
@@ -156,8 +155,8 @@ impl TestApp {
         self.create_user(NewUser::default()).await
     }
 
-    /// `$user->createToken($name)->plainTextToken`: the bearer token a
-    /// desktop client holds (Laravel's `actingAs` in the PHP tests).
+    /// A new named token of the user: the bearer token a desktop client
+    /// holds.
     pub async fn token_named(&self, user: &User, name: &str) -> String {
         let id: i64 = sqlx::query_scalar(
             "select nextval(pg_get_serial_sequence('personal_access_tokens', 'id'))",
@@ -267,7 +266,7 @@ impl TestApp {
         .expect("entry inserts")
     }
 
-    /// A character entry labelled like the PHP tests' ones.
+    /// A character entry with a label.
     pub async fn entry(&self, network: i64, entity_id: i64, label: &str, added_by: i64) -> i64 {
         self.create_entry(
             network,
@@ -318,7 +317,7 @@ impl TestApp {
             .await
     }
 
-    /// `Share::factory()->create([...])`.
+    /// A share with its pilots and view count.
     pub async fn create_share(&self, code: &str, pilots: &[&str], views: i64) -> i64 {
         sqlx::query_scalar(
             "insert into shares (code, pilots, pilot_count, views, created_at, updated_at)

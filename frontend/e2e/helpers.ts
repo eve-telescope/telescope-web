@@ -4,7 +4,6 @@
 // Sanctum made them.
 import { createHash, randomBytes } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { crc32 } from 'node:zlib';
 import { expect, type Page } from '@playwright/test';
 
@@ -28,7 +27,7 @@ export function baseUrl(): string {
   return process.env.E2E_BASE_URL ?? 'http://localhost:5318';
 }
 
-/** Laravel's RefreshDatabase: every table empty, ids from 1. */
+/** Every table empty, ids from 1. */
 export function resetDatabase(): void {
   psql(
     `truncate alliances, corporations, users, personal_access_tokens, sessions, intel_networks,
@@ -102,64 +101,9 @@ export function seedDemo(): void {
   execFileSync('docker', ['exec', 'telescope-api', 'seed_demo'], { encoding: 'utf8' });
 }
 
-type DatasetRow = Record<string, unknown>;
-
-/** tests/fixtures/dataset.json, the rows the Laravel fixtures were
- * recorded with (the visual comparison). */
-export function seedDataset(): void {
-  const path = new URL('../../tests/fixtures/dataset.json', import.meta.url);
-  const dataset = JSON.parse(readFileSync(path, 'utf8')) as Record<string, DatasetRow[]>;
-  resetDatabase();
-  for (const table of [
-    'alliances',
-    'corporations',
-    'users',
-    'personal_access_tokens',
-    'intel_networks',
-    'network_access',
-    'intel_entries',
-    'network_scans',
-    'shares',
-  ]) {
-    for (const row of dataset[table]) {
-      const resolved = Object.fromEntries(
-        Object.entries(row)
-          .filter(([key]) => !key.startsWith('_'))
-          .map(([key, value]) => [
-            key,
-            typeof value === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)
-              ? `${value}+00`
-              : value,
-          ]),
-      );
-      psql(
-        `insert into ${table} select * from jsonb_populate_record(null::${table}, ${quote(JSON.stringify(resolved))}::jsonb)`,
-      );
-    }
-    if (table !== 'alliances' && table !== 'corporations') {
-      psql(
-        `select setval(pg_get_serial_sequence('${table}', 'id'), (select max(id) from ${table}))`,
-      );
-    }
-  }
-}
-
-/** The plain token of a dataset token id. */
-export function datasetToken(id: number): string {
-  const path = new URL('../../tests/fixtures/dataset.json', import.meta.url);
-  const dataset = JSON.parse(readFileSync(path, 'utf8')) as {
-    personal_access_tokens: Record<string, string | number>[];
-  };
-  const token = dataset.personal_access_tokens.find((row) => row.id === id);
-  if (!token) throw new Error(`no dataset token ${id}`);
-  // The plain text the dataset keeps beside the stored hash.
-  return String(token['_plain']);
-}
-
-/** Collects uncaught page errors and console errors (Pest's
- * assertNoJavascriptErrors). The share page opens `telescope://` links,
- * which a browser without the app refuses with a console line; that one
- * is expected. */
+/** Collects uncaught page errors and console errors. The share page
+ * opens `telescope://` links, which a browser without the app refuses
+ * with a console line; that one is expected. */
 export function trackJavascriptErrors(page: Page): () => void {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -172,7 +116,7 @@ export function trackJavascriptErrors(page: Page): () => void {
   return () => expect(errors, 'javascript errors').toEqual([]);
 }
 
-/** Pest's `assertSee`. */
+/** Asserts the page shows the text. */
 export async function assertSee(page: Page, text: string): Promise<void> {
   await expect(page.locator('body')).toContainText(text);
 }

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { errorMessage } from './errors.ts';
 
 describe('errorMessage', () => {
-  it('names the statuses Laravel had pages for', () => {
+  it('names the statuses with their own message', () => {
     expect(errorMessage(404)).toBe('Not Found');
     expect(errorMessage(403)).toBe('Forbidden');
     expect(errorMessage(419)).toBe('Page Expired');

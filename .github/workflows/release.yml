@@ -6,9 +6,7 @@ name: Release
 # CI's warm-cache job fills.
 on:
   push:
-    # rust: temporary, so the rewrite's images exist before the merge.
-    # Goes away when rust is merged into main.
-    branches: [main, rust]
+    branches: [main]
     paths:
       - "src/**"
       - "migrations/**"

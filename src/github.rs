@@ -1,7 +1,7 @@
-//! The latest release of the desktop app (GitHubService), shown on every
-//! page as `appVersion`: asked from GitHub with a 5 second timeout and
-//! kept for an hour; a failure is `null` and is kept for 5 minutes
-//! (FIXES.md), so a failing GitHub does not slow every page.
+//! The latest release of the desktop app, shown on every page as
+//! `appVersion`: asked from GitHub with a 5 second timeout and kept for an
+//! hour; a failure is `null` and is kept for 5 minutes, so a failing
+//! GitHub does not slow every page.
 
 use std::sync::Arc;
 use std::time::Duration as StdDuration;

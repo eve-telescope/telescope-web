@@ -1,6 +1,5 @@
-// The <head> of every page, as the Laravel root view had it: the title
-// from the page (Inertia's `<Head title>` with the ` | Telescope`
-// suffix), the description, and the OpenGraph and Twitter tags with the
+// The <head> of every page: the title from the page (with the
+// ` | Telescope` suffix), the description, and the OpenGraph and Twitter tags with the
 // page's URL without its query.
 
 export const DESCRIPTION = 'Intel tool for EVE Online. Instant pilot lookups and danger ratings.';

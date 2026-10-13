@@ -131,7 +131,7 @@ pub fn parse(text: &str) -> Option<OffsetDateTime> {
     moment(&parts, date)
 }
 
-/// What `after:now` compares, like PHP's `strtotime`: the same forms, a
+/// What `after:now` compares, `strtotime`-style: the same forms, a
 /// day past the month's end rolling over (`2027-02-30` is 2 March), and
 /// the relative words `now`, `today`, `midnight`, `tomorrow` and
 /// `yesterday`.

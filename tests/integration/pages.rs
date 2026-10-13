@@ -1,13 +1,11 @@
-//! The props of the SvelteKit pages (`/api/pages/*`), the Inertia props
-//! the Laravel pages got: the shared `name`, `auth.user` and `appVersion`,
-//! and each page's own.
+//! The props of the SvelteKit pages (`/api/pages/*`): the shared `name`,
+//! `auth.user` and `appVersion`, and each page's own.
 
 use serde_json::json;
 
 use crate::common::{TestApp, assert_json_eq};
 
-/// tests/Feature/ExampleTest.php "returns a successful response" is the
-/// home page; its props are pinned here, the page itself in
+/// The home page's props; the page itself is in
 /// frontend/e2e/routes.spec.ts.
 #[tokio::test]
 async fn the_home_page_props() {

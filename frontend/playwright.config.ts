@@ -12,10 +12,6 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: [['list']],
-  snapshotPathTemplate: 'e2e/__screenshots__/{testFilePath}/{arg}{ext}',
-  expect: {
-    toHaveScreenshot: { maxDiffPixelRatio: 0.03, animations: 'disabled' },
-  },
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:5318',
     locale: 'en-US',

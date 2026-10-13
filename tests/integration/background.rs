@@ -1,5 +1,4 @@
-//! The schedule of routes/console.php, which the PHP suite never covered
-//! beyond the scan purge: `network:purge-expired-access` and when the
+//! The hourly schedule: `network:purge-expired-access` and when the
 //! hourly tasks run.
 
 use time::Duration;

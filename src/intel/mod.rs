@@ -1,12 +1,11 @@
-//! Intel networks (IntelNetworkController and its siblings): networks
-//! shared with characters, corporations and alliances, their access rows,
-//! tagged entries, shared scans, the bulk lookup and the entity search.
+//! Intel networks: networks shared with characters, corporations and
+//! alliances, their access rows, tagged entries, shared scans, the bulk
+//! lookup and the entity search.
 //!
-//! Route ids resolve like Laravel's model binding, before anything is
-//! authorized: an id that names no row is a 404 with Laravel's message.
-//! An entry or access row must belong to the network of the URL
-//! (FIXES.md); a scan is checked after the network is authorized, as
-//! before.
+//! Route ids resolve before anything is authorized: an id that names no
+//! row is a 404 that names the model (`errors::model_not_found`). An
+//! entry or access row must belong to the network of the URL; a scan is
+//! checked after the network is authorized.
 
 pub mod access;
 pub mod entries;
@@ -23,7 +22,7 @@ use time::OffsetDateTime;
 use crate::dates;
 use crate::server::errors;
 
-/// A route id: whole digits only (FIXES.md, MySQL read `5abc` as 5).
+/// A route id: whole digits only (`5abc` is no id).
 pub fn route_id(raw: &str) -> Option<i64> {
     (!raw.is_empty() && raw.bytes().all(|c| c.is_ascii_digit()))
         .then(|| raw.parse().ok())

@@ -35,7 +35,8 @@ async fn shows_the_latest_release_and_keeps_it_for_an_hour() {
     assert!(requests[0].header("user-agent").is_some());
 }
 
-/// FIXES.md: Laravel asked again on every page while GitHub failed.
+/// A failure is cached too, so a failing GitHub is not asked on every
+/// page.
 #[tokio::test]
 async fn a_failure_is_remembered_for_five_minutes() {
     let app = TestApp::new().await;

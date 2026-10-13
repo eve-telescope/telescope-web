@@ -1,13 +1,12 @@
 //! Shared harness for the integration suites: the real router on the test
 //! database with a fixed clock, mock ESI, EVE SSO and GitHub servers on
 //! ephemeral ports, request helpers that speak like the desktop clients,
-//! the factories the PHP tests used and the JSON assertions.
+//! the factories and the JSON assertions.
 
 // Not every suite uses every helper.
 #![allow(dead_code)]
 
 pub mod factories;
-pub mod golden;
 pub mod mocks;
 pub mod socket;
 
@@ -40,7 +39,7 @@ pub const PUSHER_SECRET: &str = "test-pusher-secret";
 pub const EVE_CLIENT_ID: &str = "test-client-id";
 pub const EVE_CLIENT_SECRET: &str = "test-client-secret";
 
-/// The moment the ported PHP tests run at (they used `now()`).
+/// The moment the tests run at, unless they set their own.
 pub const DEFAULT_NOW: OffsetDateTime = datetime!(2026-10-13 08:30:00 UTC);
 /// `DEFAULT_NOW` as a model serializes it.
 pub const NOW_Z: &str = "2026-10-13T08:30:00.000000Z";
@@ -70,7 +69,7 @@ pub async fn test_pool() -> PgPool {
         .expect("Postgres not reachable - start it with `docker compose up -d postgres`")
 }
 
-/// Clears every table; ids restart at 1, like Laravel's RefreshDatabase.
+/// Clears every table; ids restart at 1.
 pub async fn reset_database(pool: &PgPool) {
     sqlx::query(
         "truncate alliances, corporations, users, personal_access_tokens, sessions,
@@ -393,24 +392,4 @@ pub fn keys(value: &Value) -> Vec<String> {
         .keys()
         .cloned()
         .collect()
-}
-
-/// The routes of the Laravel app: (method, path), HEAD left out where
-/// GET has it.
-pub fn read_routes() -> Vec<(String, String)> {
-    let text = std::fs::read_to_string(repo_path("tests/fixtures/routes.json")).expect("routes");
-    let routes: Vec<Value> = serde_json::from_str(&text).expect("routes JSON");
-    let mut all = Vec::new();
-    for route in routes {
-        let uri = route["uri"].as_str().expect("a uri");
-        let uri = if uri == "/" {
-            "/".to_owned()
-        } else {
-            format!("/{uri}")
-        };
-        for method in route["method"].as_str().expect("methods").split('|') {
-            all.push((method.to_owned(), uri.clone()));
-        }
-    }
-    all
 }

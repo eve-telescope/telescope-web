@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The desktop login's last page (the Vue AuthToken page): open the app
+  // The desktop login's last page: open the app
   // with the token, or copy it.
   import { CopyState } from '#lib/opener.svelte.ts';
 

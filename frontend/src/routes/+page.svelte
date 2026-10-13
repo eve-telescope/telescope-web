@@ -5,7 +5,7 @@
 </script>
 
 <script lang="ts">
-  // The landing page (the Vue Welcome page): the app, its features, the
+  // The landing page: the app, its features, the
   // downloads and the latest version.
   import PageHead from '#lib/components/page-head.svelte';
   import Starfield from '#lib/components/starfield.svelte';

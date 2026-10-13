@@ -1,7 +1,7 @@
-//! Network access (NetworkAccessController, NetworkAccessData): who may
-//! use a network. Rows keep the PHP class names as their type; the API
-//! answers plain types with the named entity, except `POST
-//! /api/networks`, which has always answered the raw row.
+//! Network access: who may use a network. Rows keep the class names
+//! (`App\Models\User`) as their type; the API answers plain types with
+//! the named entity, except `POST /api/networks`, which has always
+//! answered the raw row.
 
 use axum::Json;
 use axum::extract::{Path, State};
@@ -66,8 +66,8 @@ impl Access {
     }
 }
 
-/// The rows of a network in the order MySQL's unique index returned them:
-/// by the PHP class name (Alliance, Corporation, User), then the id.
+/// The rows of a network in the order the API has always answered: by
+/// the class name (Alliance, Corporation, User), then the entity id.
 pub async fn of_network(pool: &PgPool, network_id: i64) -> sqlx::Result<Vec<Access>> {
     sqlx::query_as(sqlx::AssertSqlSafe(format!(
         "select {COLUMNS} from network_access where intel_network_id = $1
@@ -213,8 +213,7 @@ pub async fn entity(pool: &PgPool, class: &str, id: i64) -> sqlx::Result<Value> 
     }
 }
 
-/// The `{access}` of a route: it must be one of the network's rows
-/// (FIXES.md).
+/// The `{access}` of a route: it must be one of the network's rows.
 async fn bind(pool: &PgPool, network: &Network, raw: &str) -> Result<Access, Response> {
     let row: Option<Access> = match super::route_id(raw) {
         Some(id) => sqlx::query_as(sqlx::AssertSqlSafe(format!(
@@ -327,7 +326,7 @@ pub async fn store(
     .map_err(errors::server_error)?;
     let expires_at = expiry(&input);
     let id = match existing {
-        // FIXES.md: a grant may not change the owner's row.
+        // A grant may not change the owner's row.
         Some(row) if row.is_owner => {
             return Ok(errors::json_error(
                 StatusCode::FORBIDDEN,

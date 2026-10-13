@@ -1,6 +1,6 @@
 //! Error answers. JSON for clients that ask for it (`Accept:
 //! application/json`, as every desktop client sends), the minimal error
-//! page otherwise, the way Laravel's exception handler answered.
+//! page otherwise.
 
 use axum::Json;
 use axum::extract::Request;
@@ -52,7 +52,7 @@ pub fn http_error(status: StatusCode, message: &str) -> Response {
     response
 }
 
-/// A route parameter that names no row: Laravel's model binding message.
+/// A route parameter that names no row, with the model in the message.
 pub fn model_not_found(model: &str, id: &str) -> Response {
     http_error(
         StatusCode::NOT_FOUND,
@@ -65,9 +65,8 @@ pub fn forbidden() -> Response {
     http_error(StatusCode::FORBIDDEN, "This action is unauthorized.")
 }
 
-/// No valid token. Always JSON: Laravel answered a client that did not
-/// ask for JSON with a 500, looking for a login page the site never had
-/// (FIXES.md).
+/// No valid token. Always JSON, whatever the client asked for: there is
+/// no login page to send it to.
 pub fn unauthenticated() -> Response {
     json_error(StatusCode::UNAUTHORIZED, "Unauthenticated.")
 }
@@ -82,8 +81,8 @@ pub fn server_error(error: impl std::fmt::Display) -> Response {
     )
 }
 
-/// Laravel's route path in messages: without the leading slash, `/` for
-/// the root.
+/// The route path in messages: without the leading slash, `/` for the
+/// root.
 fn route_path(uri: &Uri) -> String {
     let path = uri.path().trim_start_matches('/');
     if path.is_empty() {
@@ -101,14 +100,8 @@ pub async fn not_found(uri: Uri) -> Response {
     )
 }
 
-/// The answer of every route that is registered but not ported yet.
-pub async fn not_implemented() -> Response {
-    json_error(StatusCode::NOT_IMPLEMENTED, "Not Implemented")
-}
-
 /// Whether the client asked for JSON: the most wanted type of its
-/// `Accept` header is JSON, or it is an XHR that takes anything
-/// (Laravel's `expectsJson`).
+/// `Accept` header is JSON, or it is an XHR that takes anything.
 pub fn expects_json(headers: &HeaderMap) -> bool {
     let accept = headers
         .get(header::ACCEPT)
@@ -142,7 +135,7 @@ pub fn expects_json(headers: &HeaderMap) -> bool {
 }
 
 /// Renders the error answers for the client: the error page unless it
-/// asked for JSON, and the supported methods of a 405 in Laravel's words.
+/// asked for JSON, and the supported methods in a 405's message.
 pub async fn negotiate(request: Request, next: Next) -> Response {
     let wants_json = expects_json(request.headers());
     let method = request.method().clone();

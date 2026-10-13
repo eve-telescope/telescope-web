@@ -1,5 +1,4 @@
-//! The props of the SvelteKit pages, the Inertia props of the Laravel
-//! pages (`/api/pages/*`): the shared `name`, `auth.user` (the website
+//! The props of the SvelteKit pages (`/api/pages/*`): the shared `name`, `auth.user` (the website
 //! session's user) and `appVersion`, merged with each page's own.
 
 use axum::Json;
@@ -12,7 +11,7 @@ use super::AppState;
 use super::errors;
 use crate::auth::session;
 
-/// HandleInertiaRequests::share.
+/// The props every page shares.
 pub async fn shared_props(state: &AppState, headers: &HeaderMap) -> Result<Value, Response> {
     let user = session::user(
         &state.pool,
