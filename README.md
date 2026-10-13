@@ -1,160 +1,128 @@
 # Telescope Web
 
-<p align="center">
-  <img src="public/favicon.svg" width="128" height="128" alt="Telescope Logo">
-</p>
+[![CI](https://github.com/eve-telescope/telescope-web/actions/workflows/ci.yml/badge.svg)](https://github.com/eve-telescope/telescope-web/actions/workflows/ci.yml)
+[![Release](https://github.com/eve-telescope/telescope-web/actions/workflows/release.yml/badge.svg)](https://github.com/eve-telescope/telescope-web/actions/workflows/release.yml)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Feve-telescope.com&label=eve-telescope.com)](https://eve-telescope.com)
+[![Desktop app](https://img.shields.io/github/v/release/eve-telescope/telescope-app?label=desktop%20app)](https://github.com/eve-telescope/telescope-app/releases/latest)
+[![Rust](https://img.shields.io/badge/Rust-Axum-DEA584?logo=rust&logoColor=white)](https://github.com/tokio-rs/axum)
+[![SvelteKit](https://img.shields.io/badge/SvelteKit-Svelte%205-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev/docs/kit)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![License](https://img.shields.io/badge/license-MIT-blue)](#license)
 
-<p align="center">
-  <strong>Web Interface for Telescope</strong><br>
-  Landing page & share link handler for the EVE Online intel tool
-</p>
-
-<p align="center">
-  <a href="https://github.com/eve-telescope/telescope-web/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/eve-telescope/telescope-web?style=flat-square" alt="License">
-  </a>
-</p>
-
----
-
-## Overview
-
-Telescope Web serves two purposes:
-
-1. **Landing Page** — Download links and feature overview for the Telescope app
-2. **Share Handler** — Handles shared scan links and redirects to the desktop app
-
-When someone shares a scan link like `https://telescope.example.com/s/ABC123`, the web app:
-- Displays the shared pilot list
-- Attempts to open the Telescope desktop app via deep link (`telescope://s/ABC123`)
-- Provides fallback options if the app isn't installed
+The website and server behind [Telescope](https://github.com/eve-telescope/telescope-app),
+the desktop intel tool for EVE Online. It serves the landing page and
+shared scan links, logs pilots in with EVE SSO and hands the desktop app
+its token, and runs the API and the realtime channel of the app's intel
+networks.
 
 ## Features
 
-- 🌐 **Landing Page** — EVE-themed download page with feature highlights
-- 🔗 **Share Links** — Short URLs for sharing scans (`/s/{code}`)
-- 📋 **Copy Fallback** — Users without the app can copy pilot names
-- 🌙 **Dark Theme** — EVE Online inspired aesthetic
-- ⚡ **Fast** — Built with Laravel + Inertia + Vue
+- Landing page with the latest desktop release from GitHub
+- Share links (`/s/<code>`): a pilot list that opens in the desktop app
+  (`telescope://s/<code>`), with a copy fallback and a view counter
+- EVE SSO login: a token for the desktop app (`/eve?desktop`, deep-linked
+  as `telescope://auth?token=...`) or a website session
+- Intel networks for the desktop app: sharing with characters,
+  corporations or alliances, viewer, member and manager permissions with
+  optional expiry, tagged entries, shared local and d-scans, bulk lookup
+  and entity search
+- Realtime updates over the Pusher protocol 7 at
+  `wss://ws.eve-telescope.com/app/<key>`, private channels signed by
+  `/broadcasting/auth`
+- Hourly ESI refresh of corporations and alliances, expired access and old
+  scans (with `SCHEDULER_ENABLED`)
 
-## Tech Stack
+Installed desktop clients cannot be updated with the site, so the API
+paths, JSON shapes, token format and websocket frames are a fixed
+contract, pinned by the test suites.
 
-- **Backend**: Laravel 12, PHP 8.4
-- **Frontend**: Vue 3, Inertia.js, TypeScript
-- **Styling**: Tailwind CSS 4
-- **Database**: SQLite (or any Laravel-supported DB)
+## Stack
 
-## API Endpoints
+- API: Rust, [Axum](https://github.com/tokio-rs/axum) and
+  [sqlx](https://github.com/launchbadge/sqlx) on Postgres, with the
+  websocket server built in
+- Frontend: [SvelteKit](https://svelte.dev/docs/kit) (SSR, adapter-node),
+  Svelte 5 and Tailwind CSS 4
+- External: EVE SSO, ESI and GitHub's releases API
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/share` | Create a new share |
-| `GET` | `/api/share/{code}` | Get share data (JSON) |
-| `GET` | `/s/{code}` | View share page (HTML) |
+Caddy (or the Vite dev proxy) puts both behind one origin: the paths in
+`frontend/proxy-paths.ts` and every non-GET request go to Axum, page loads
+to SvelteKit. `deploy/Caddyfile` holds the same list.
 
-### Create Share
+## Getting started
 
-```bash
-curl -X POST https://telescope.example.com/api/share \
-  -H "Content-Type: application/json" \
-  -d '{"pilots": ["Pilot One", "Pilot Two", "Pilot Three"]}'
-```
-
-Response:
-```json
-{
-  "code": "ABC123",
-  "url": "https://telescope.example.com/s/ABC123"
-}
-```
-
-## Development
-
-### Prerequisites
-
-- PHP 8.4+
-- Composer
-- Node.js 18+
-- SQLite (or MySQL/PostgreSQL)
-
-### Setup
+The whole stack (Postgres, API, SvelteKit, Caddy) on
+http://localhost:5318, with a demo pilot seeded:
 
 ```bash
-# Clone the repository
-git clone https://github.com/eve-telescope/telescope-web.git
-cd telescope-web
-
-# Install PHP dependencies
-composer install
-
-# Install Node dependencies
-npm install
-
-# Copy environment file
-cp .env.example .env
-
-# Generate app key
-php artisan key:generate
-
-# Run migrations
-php artisan migrate
-
-# Start development server
-composer run dev
+docker compose up --build -d
 ```
 
-### Project Structure
+`/demo-login` signs the website in as the demo pilot, `/demo-login?desktop`
+shows a desktop token for it. `docker compose run --rm demo-seed` resets
+the demo rows.
 
+Or natively, with only Postgres in docker:
+
+```bash
+docker compose up -d postgres     # Postgres on 127.0.0.1:5448
+cargo run                         # API on 127.0.0.1:3000
+cd frontend && npm install && npm run dev
 ```
-telescope-web/
-├── app/
-│   ├── Http/Controllers/
-│   │   └── ShareController.php    # Share API & page controller
-│   └── Models/
-│       └── Share.php              # Share model
-├── resources/
-│   ├── js/
-│   │   └── pages/
-│   │       ├── Welcome.vue        # Landing page
-│   │       └── Share.vue          # Share view page
-│   └── css/
-│       └── app.css                # Tailwind + EVE theme
-├── routes/
-│   ├── api.php                    # API routes
-│   └── web.php                    # Web routes
-└── database/
-    └── migrations/                # Database migrations
+
+Configuration lives in `.env` (see `.env.example`). The EVE login needs
+`EVE_CLIENT_ID` and `EVE_CLIENT_SECRET` of an application whose callback
+is `EVE_CALLBACK`.
+
+## Testing
+
+```bash
+docker compose up -d postgres
+cargo test
+cd frontend && npm run check && npm run lint && npm run format:check && npm test
+docker compose up --build -d && cd frontend && npm run test:e2e
 ```
+
+The Rust suites drive the real router on their own `telescope_test`
+database with a fixed clock, against mock ESI, EVE SSO and GitHub servers,
+and talk to the websocket server with a real client. Playwright runs
+against the composed stack, the realtime suite with pusher-js and
+laravel-echo.
 
 ## Deployment
 
-### Environment Variables
+Production runs on Coolify from `compose.prod.yml`:
 
-```env
-APP_URL=https://telescope.example.com
+1. A merge to main runs `.github/workflows/release.yml`, which builds the
+   api, frontend and proxy images and pushes them to
+   `ghcr.io/eve-telescope/telescope-*` (`latest` and the commit).
+2. The workflow then calls Coolify's deploy webhook (`COOLIFY_WEBHOOK`,
+   `COOLIFY_TOKEN`), and Coolify pulls the images and restarts the
+   services.
+3. The api runs its migrations on startup.
+
+Only the proxy has domains: https://eve-telescope.com and
+https://ws.eve-telescope.com for the desktop clients' websocket. Traefik
+terminates TLS in front of it and `deploy/Caddyfile` routes by host. The
+api reaches the shared Coolify Postgres over the `coolify` network.
+`DATABASE_URL`, `EVE_CLIENT_ID`, `EVE_CLIENT_SECRET` and
+`PUSHER_APP_SECRET` are Coolify environment variables.
+
+## Layout
+
 ```
-
-### Production Build
-
-```bash
-npm run build
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+src/                 the API: auth, intel networks, shares, search, realtime, router
+src/pusher/          the Pusher protocol server and channel auth
+src/bin/             migrate, seed_demo and the hourly tasks as commands
+migrations/          the Postgres schema
+tests/integration/   the Rust suites, one binary
+frontend/            the SvelteKit app and its Playwright suite (e2e/)
+deploy/              the Caddyfile and proxy image
 ```
-
-## Related
-
-- [telescope-app](https://github.com/eve-telescope/telescope-app) — Desktop application (Tauri + Vue)
 
 ## License
 
-MIT © [eve-telescope](https://github.com/eve-telescope)
+MIT
 
----
-
-<p align="center">
-  <sub>Not affiliated with CCP Games. EVE Online and all related logos are trademarks of CCP hf.</sub>
-</p>
-
-
+Not affiliated with CCP Games. EVE Online and all related logos are
+trademarks of CCP hf.

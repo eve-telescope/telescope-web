@@ -1,0 +1,16 @@
+{
+  "extends": "$app/tsconfig",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "sourceMap": true,
+    "strict": true
+  },
+  "include": [
+    "src",
+    "e2e",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "proxy-paths.ts",
+    "proxy-paths.test.ts"
+  ]
+}

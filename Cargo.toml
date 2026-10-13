@@ -1,0 +1,86 @@
+[package]
+name = "telescope"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "eve-telescope.com: the site, the intel network API and the realtime channel of the Telescope desktop app for EVE Online"
+default-run = "telescope"
+
+[dependencies]
+axum = { version = "0.8", features = ["ws"] }
+# The website's session cookie and the EVE login's state cookie.
+axum-extra = { version = "0.12", features = ["cookie"] }
+# Sanctum's token checksum (`crc32b` of the random part).
+crc32fast = "1"
+# The ASCII transliteration of network names for their slugs.
+deunicode = "1"
+dotenvy = "0.15"
+form_urlencoded = "1"
+futures-util = "0.3"
+hex = "0.4"
+# Signs and checks the private channel subscriptions (HMAC-SHA256).
+hmac = "0.13"
+# Verifies the EVE SSO access token against its published keys.
+jsonwebtoken = { version = "11", features = ["rust_crypto"] }
+rand = "0.10"
+regex = "1"
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "json", "form"] }
+serde = { version = "1", features = ["derive"] }
+# Key order follows insertion, so the JSON answers keep the order the
+# desktop clients always received.
+serde_json = { version = "1", features = ["preserve_order"] }
+sha2 = "0.11"
+sqlx = { version = "0.9", features = [
+    "runtime-tokio",
+    "tls-rustls",
+    "postgres",
+    "migrate",
+    "time",
+    "json",
+] }
+# Dates and timestamps; everything is UTC like the app always was.
+time = { version = "0.3", features = ["formatting", "parsing", "macros"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "signal"] }
+tower = "0.5"
+# Paths with a trailing slash reach the same route.
+tower-http = { version = "0.7", features = ["normalize-path"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+
+[dev-dependencies]
+http-body-util = "0.1"
+# The websocket client of the realtime tests.
+tokio-tungstenite = "0.30"
+tower = { version = "0.5", features = ["util"] }
+
+[[bin]]
+name = "telescope"
+path = "src/main.rs"
+
+[[bin]]
+name = "migrate"
+path = "src/bin/migrate.rs"
+
+[[bin]]
+name = "purge_scans"
+path = "src/bin/purge_scans.rs"
+
+[[bin]]
+name = "purge_expired_access"
+path = "src/bin/purge_expired_access.rs"
+
+[[bin]]
+name = "refresh_affiliations"
+path = "src/bin/refresh_affiliations.rs"
+
+[[bin]]
+name = "seed_demo"
+path = "src/bin/seed_demo.rs"
+
+# Handlers return `Result<_, Response>`, as in MutaMarket.
+[lints.clippy]
+result_large_err = "allow"
+
+# The RSA math of the token check is slow unoptimized.
+[profile.dev.package."*"]
+opt-level = 2

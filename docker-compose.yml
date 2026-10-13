@@ -1,0 +1,149 @@
+# The whole stack on http://localhost:5318:
+#   docker compose up --build
+# (the demo-seed service seeds the demo pilot, its networks, entries,
+# scans and shares; /demo-login signs in as it without EVE SSO)
+# The local preview on https://telescope.test (portal):
+#   APP_URL=https://telescope.test ORIGIN=https://telescope.test docker compose up --build -d
+# Hot-reloading frontend instead of the built one:
+#   docker compose --profile dev up -d postgres api frontend-dev
+# Postgres alone, for `cargo run` + `npm run dev` on the host:
+#   docker compose up -d postgres
+#
+# Fixed ports, so the stack runs next to other projects: Postgres 5448,
+# the composed stack 5318 (the websocket too, at /app/<key>).
+
+name: telescope
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: telescope-postgres
+    environment:
+      POSTGRES_USER: telescope
+      POSTGRES_PASSWORD: telescope
+      POSTGRES_DB: telescope
+    ports:
+      - "127.0.0.1:5448:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U telescope"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    logging: *logging
+
+  api:
+    build: .
+    image: telescope-api
+    container_name: telescope-api
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgres://telescope:telescope@postgres:5432/telescope
+      BIND_ADDR: 0.0.0.0:3000
+      APP_URL: ${APP_URL:-http://localhost:5318}
+      RUST_LOG: ${RUST_LOG:-info}
+      # A fixed secret, so the e2e suite can sign channel subscriptions.
+      PUSHER_APP_SECRET: ${PUSHER_APP_SECRET:-local-pusher-secret}
+      # The demo login is a dev convenience (and the e2e suite uses it).
+      DEMO_ENABLED: ${DEMO_ENABLED:-true}
+      # The hourly tasks call ESI; off unless asked for.
+      SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    develop:
+      watch:
+        - { action: rebuild, path: ./src }
+        - { action: rebuild, path: ./migrations }
+        - { action: rebuild, path: ./Cargo.toml }
+    logging: *logging
+
+  # One-shot: creates or refreshes the demo pilot and its sample networks,
+  # entries, scans and shares. Safe to repeat; it migrates first and
+  # replaces the demo rows.
+  demo-seed:
+    build: .
+    # The api's image, so `up --no-build` runs it without a build of its
+    # own.
+    image: telescope-api
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgres://telescope:telescope@postgres:5432/telescope
+      APP_URL: ${APP_URL:-http://localhost:5318}
+    command: seed_demo
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    logging: *logging
+
+  frontend:
+    build: ./frontend
+    image: telescope-frontend
+    container_name: telescope-frontend
+    environment:
+      AXUM_URL: http://api:3000
+      ORIGIN: ${ORIGIN:-http://localhost:5318}
+      # adapter-node takes the scheme and host of page URLs (og:url) from
+      # the proxy: http://localhost:5318 directly,
+      # https://telescope.test through the portal.
+      PROTOCOL_HEADER: x-forwarded-proto
+      HOST_HEADER: x-forwarded-host
+    depends_on:
+      - api
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: ./frontend
+          ignore: [node_modules/, .svelte-kit/, build/]
+    logging: *logging
+
+  # The production proxy's Caddyfile (deploy/Dockerfile), mounted so an
+  # edit only needs a restart.
+  proxy:
+    image: caddy:2.11.4
+    container_name: telescope-proxy
+    ports:
+      - "127.0.0.1:5318:80"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - api
+      - frontend
+    restart: unless-stopped
+    logging: *logging
+
+  frontend-dev:
+    image: node:26
+    container_name: telescope-frontend-dev
+    profiles: ["dev"]
+    working_dir: /app
+    command: sh -c "npm ci && npx vite dev --host 0.0.0.0 --port 5318"
+    environment:
+      AXUM_URL: http://api:3000
+      VITE_POLL_WATCH: "1"
+    ports:
+      - "127.0.0.1:5318:5318"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    depends_on:
+      - api
+    logging: *logging
+
+volumes:
+  postgres-data:
+  frontend-node-modules:

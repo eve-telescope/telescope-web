@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn",
+    "pedantic": "off",
+    "style": "off"
+  },
+  "rules": {
+    // Off deliberately: these fire on arrays the code just built with
+    // map/filter, where mutating in place is the point. Keeping them on
+    // buried the ~10 warnings worth reading under 50 that are not.
+    "unicorn/no-array-sort": "off",
+    "unicorn/no-array-reverse": "off",
+    // A structure preference, not a defect: hoisting every closure out
+    // of its component would cost it the props it closes over.
+    "unicorn/consistent-function-scoping": "off"
+  },
+  "overrides": [
+    {
+      // The e2e specs walk pages and seed the database one step at a
+      // time on purpose.
+      "files": ["e2e/**"],
+      "rules": { "eslint/no-await-in-loop": "off" }
+    }
+  ],
+  "ignorePatterns": [".svelte-kit", "build", "node_modules"]
+}

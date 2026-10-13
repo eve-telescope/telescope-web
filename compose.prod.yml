@@ -1,0 +1,98 @@
+# Production, a Coolify Docker Compose resource (this file), deployed
+# from the images .github/workflows/release.yml pushes to GHCR on every
+# merge to main.
+#
+# Only telescope-proxy gets domains: in Coolify set its "Domains" to
+# https://eve-telescope.com,https://ws.eve-telescope.com and leave the api
+# and frontend without one. Traefik terminates TLS and hands plain HTTP to
+# the proxy on :80, which routes by Host (deploy/Caddyfile): the site on
+# eve-telescope.com, the Pusher protocol websocket every desktop client
+# connects to on ws.eve-telescope.com.
+#
+# The api also joins Coolify's external `coolify` network to reach the
+# shared Postgres, a Coolify database (its host is in DATABASE_URL). Other
+# apps share that network, so a plain `api` would be ambiguous there:
+# every service carries the app prefix, and the proxy finds its upstreams
+# through API_HOST and FRONTEND_HOST. The frontend and the proxy stay on
+# the default network only. The api runs its migrations on startup.
+#
+# Coolify fills in the ${VAR}s from the resource's environment variables:
+# DATABASE_URL is required; EVE_CLIENT_ID, EVE_CLIENT_SECRET (the CCP
+# application) and PUSHER_APP_SECRET belong there too. PUSHER_APP_KEY
+# defaults to the key every desktop client ships with and must never
+# change.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  telescope-api:
+    image: ghcr.io/eve-telescope/telescope-api:latest
+    pull_policy: always
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?}
+      BIND_ADDR: 0.0.0.0:3000
+      APP_URL: ${APP_URL:-https://eve-telescope.com}
+      APP_NAME: ${APP_NAME:-}
+      RUST_LOG: ${RUST_LOG:-info}
+      EVE_CLIENT_ID: ${EVE_CLIENT_ID:-}
+      EVE_CLIENT_SECRET: ${EVE_CLIENT_SECRET:-}
+      EVE_CALLBACK: ${EVE_CALLBACK:-https://eve-telescope.com/eve/callback}
+      PUSHER_APP_ID: ${PUSHER_APP_ID:-}
+      PUSHER_APP_KEY: ${PUSHER_APP_KEY:-}
+      PUSHER_APP_SECRET: ${PUSHER_APP_SECRET:-}
+      SESSION_LIFETIME_DAYS: ${SESSION_LIFETIME_DAYS:-}
+      SCAN_RETENTION_DAYS: ${SCAN_RETENTION_DAYS:-}
+      # The hourly tasks (affiliations, expired access, old scans) are off
+      # unless enabled in Coolify.
+      SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-false}
+      # No demo login on the live site.
+      DEMO_ENABLED: ${DEMO_ENABLED:-false}
+    # The image has no curl or wget; bash talks HTTP to /up itself.
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -c
+        - "exec 3<>/dev/tcp/127.0.0.1/3000 && printf 'GET /up HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && head -n 1 <&3 | grep -q ' 200 '"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - default
+      - coolify
+    restart: unless-stopped
+    logging: *logging
+
+  telescope-frontend:
+    image: ghcr.io/eve-telescope/telescope-frontend:latest
+    pull_policy: always
+    environment:
+      AXUM_URL: http://telescope-api:3000
+      ORIGIN: ${APP_URL:-https://eve-telescope.com}
+      # The scheme of page URLs, from the proxy.
+      PROTOCOL_HEADER: x-forwarded-proto
+    depends_on:
+      - telescope-api
+    restart: unless-stopped
+    logging: *logging
+
+  telescope-proxy:
+    image: ghcr.io/eve-telescope/telescope-proxy:latest
+    pull_policy: always
+    environment:
+      API_HOST: telescope-api
+      FRONTEND_HOST: telescope-frontend
+    depends_on:
+      - telescope-api
+      - telescope-frontend
+    restart: unless-stopped
+    logging: *logging
+
+networks:
+  coolify:
+    external: true

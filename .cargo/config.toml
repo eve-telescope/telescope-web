@@ -1,0 +1,5 @@
+# The integration suites (tests/integration) share one process and one
+# database; they clean the tables they assert about, so tests must never
+# run concurrently.
+[env]
+RUST_TEST_THREADS = "1"
