@@ -1,0 +1,79 @@
+{
+  "name": "search_wildcard_percent",
+  "request": {
+    "method": "GET",
+    "path": "/api/search?query=%25%25&category=corporation",
+    "token": 1,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": [
+      {
+        "id": 98000001,
+        "name": "Karmafleet",
+        "category": "corporation",
+        "ticker": "KARMA",
+        "corporation": null,
+        "alliance": {
+          "id": 99000001,
+          "name": "Goonswarm Fédération",
+          "ticker": "CONDI"
+        }
+      },
+      {
+        "id": 98000002,
+        "name": "Test Corp",
+        "category": "corporation",
+        "ticker": "TSTC",
+        "corporation": null,
+        "alliance": {
+          "id": 99000002,
+          "name": "Test Alliance Please Ignore",
+          "ticker": "TEST"
+        }
+      },
+      {
+        "id": 98000003,
+        "name": "Solo Corp",
+        "category": "corporation",
+        "ticker": "SOLO",
+        "corporation": null,
+        "alliance": null
+      },
+      {
+        "id": 98000004,
+        "name": "Ally Corp",
+        "category": "corporation",
+        "ticker": "ALLY",
+        "corporation": null,
+        "alliance": {
+          "id": 99000002,
+          "name": "Test Alliance Please Ignore",
+          "ticker": "TEST"
+        }
+      },
+      {
+        "id": 98000005,
+        "name": "100% Pure_Corp",
+        "category": "corporation",
+        "ticker": "PURE",
+        "corporation": null,
+        "alliance": null
+      }
+    ]
+  },
+  "rows": {},
+  "started_at": 1791895058,
+  "finished_at": 1791895059
+}

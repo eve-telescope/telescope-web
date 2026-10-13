@@ -1,0 +1,49 @@
+{
+  "name": "lookup_member",
+  "request": {
+    "method": "GET",
+    "path": "/api/intel/lookup?entity_ids%5B0%5D=90001003&entity_ids%5B1%5D=99000777",
+    "token": 2,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": [
+      {
+        "id": 3,
+        "intel_network_id": 1,
+        "network_name": "Alpha Intel",
+        "entity_type": "alliance",
+        "entity_id": 99000777,
+        "entity_name": "Enemy Alliance",
+        "color": "#ffaa22",
+        "label": "KOS",
+        "notes": null
+      },
+      {
+        "id": 6,
+        "intel_network_id": 3,
+        "network_name": "Charlie Ops",
+        "entity_type": "character",
+        "entity_id": 90001003,
+        "entity_name": "Secret Sam",
+        "color": null,
+        "label": "SPY",
+        "notes": null
+      }
+    ]
+  },
+  "rows": {},
+  "started_at": 1791895022,
+  "finished_at": 1791895023
+}

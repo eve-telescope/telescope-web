@@ -99,6 +99,16 @@ Now: 403, like a network the user may not see.
 
 Test: `broadcasting_auth::a_malformed_network_id_is_forbidden`.
 
+### Channel auth for a missing or malformed socket id was a 500
+
+Laravel: pusher-php-server refused a `socket_id` that is not two numbers
+joined by a dot with an exception (500), and signed a missing one as an
+empty string.
+
+Now: 403, like a channel the user may not join.
+
+Test: `broadcasting_auth::a_malformed_socket_id_is_forbidden`.
+
 ### An ESI hiccup at login removed the user's corporation and alliance
 
 Laravel: when the affiliation lookup failed at login, the user was saved
@@ -293,6 +303,24 @@ with the frames Reverb sent (`tests/fixtures/golden/pusher`). Differences:
 Tests: `pusher_protocol::a_presence_channel_is_refused`,
 `pusher_protocol::client_events_are_not_relayed`,
 `broadcasting_auth::a_presence_channel_is_refused`.
+
+### Slugs of scripts PHP did not transliterate
+
+A new network's slug comes from the `deunicode` crate, which agrees with
+`Str::slug` on every recorded Latin, Greek and Cyrillic name but also
+spells out Chinese, Japanese and emoji, where PHP's table left nothing
+(`-a1B2c3` alone). Slugs are only shown, never looked up. The test lists
+every difference.
+
+Test: `golden_php::slugs_match_laravel`.
+
+### The 405 page
+
+A browser that sent an API route the wrong method got Symfony's fallback
+error page ("Oops! An Error Occurred"); it now gets the minimal error page
+of every other status. JSON clients get the same answer as before.
+
+Test: `api_errors::a_known_route_with_another_method_is_405`.
 
 ### Share links use APP_URL
 

@@ -1,0 +1,121 @@
+{
+  "name": "scans_index_page_2",
+  "request": {
+    "method": "GET",
+    "path": "/api/networks/1/scans?page=2",
+    "token": 3,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "current_page": 2,
+      "data": [
+        {
+          "id": 5,
+          "scan_type": "local",
+          "raw_text": "Pilot 4A\nPilot 4B",
+          "solar_system": null,
+          "created_at": "2026-10-04T16:00:00+00:00",
+          "submitted_by": {
+            "id": 90000001,
+            "character_name": "Owner Pilot"
+          }
+        },
+        {
+          "id": 4,
+          "scan_type": "dscan",
+          "raw_text": "12343\tRifter 3\tRifter\t30 km\n23453\tHeron\tHeron\t-",
+          "solar_system": null,
+          "created_at": "2026-10-04T15:00:00+00:00",
+          "submitted_by": {
+            "id": 90000002,
+            "character_name": "Member Pilot"
+          }
+        },
+        {
+          "id": 3,
+          "scan_type": "local",
+          "raw_text": "Pilot 2A\nPilot 2B",
+          "solar_system": null,
+          "created_at": "2026-10-04T14:00:00+00:00",
+          "submitted_by": {
+            "id": 90000001,
+            "character_name": "Owner Pilot"
+          }
+        },
+        {
+          "id": 2,
+          "scan_type": "local",
+          "raw_text": "Pilot 1A\nPilot 1B",
+          "solar_system": null,
+          "created_at": "2026-10-04T13:00:00+00:00",
+          "submitted_by": {
+            "id": 90000002,
+            "character_name": "Member Pilot"
+          }
+        },
+        {
+          "id": 1,
+          "scan_type": "dscan",
+          "raw_text": "12340\tRifter 0\tRifter\t0 km\n23450\tHeron\tHeron\t-",
+          "solar_system": "Jita",
+          "created_at": "2026-10-04T12:00:00+00:00",
+          "submitted_by": {
+            "id": 90000001,
+            "character_name": "Owner Pilot"
+          }
+        }
+      ],
+      "first_page_url": "https://eve-telescope.com/api/networks/1/scans?page=1",
+      "from": 21,
+      "last_page": 2,
+      "last_page_url": "https://eve-telescope.com/api/networks/1/scans?page=2",
+      "links": [
+        {
+          "url": "https://eve-telescope.com/api/networks/1/scans?page=1",
+          "label": "&laquo; Previous",
+          "page": 1,
+          "active": false
+        },
+        {
+          "url": "https://eve-telescope.com/api/networks/1/scans?page=1",
+          "label": "1",
+          "page": 1,
+          "active": false
+        },
+        {
+          "url": "https://eve-telescope.com/api/networks/1/scans?page=2",
+          "label": "2",
+          "page": 2,
+          "active": true
+        },
+        {
+          "url": null,
+          "label": "Next &raquo;",
+          "page": null,
+          "active": false
+        }
+      ],
+      "next_page_url": null,
+      "path": "https://eve-telescope.com/api/networks/1/scans",
+      "per_page": 20,
+      "prev_page_url": "https://eve-telescope.com/api/networks/1/scans?page=1",
+      "to": 25,
+      "total": 25
+    }
+  },
+  "rows": {},
+  "started_at": 1791895029,
+  "finished_at": 1791895030
+}

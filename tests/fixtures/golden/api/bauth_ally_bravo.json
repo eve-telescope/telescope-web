@@ -1,0 +1,31 @@
+{
+  "name": "bauth_ally_bravo",
+  "request": {
+    "method": "POST",
+    "path": "/broadcasting/auth",
+    "token": 7,
+    "body": null,
+    "form": {
+      "socket_id": "123.456",
+      "channel_name": "private-intel-network.2"
+    },
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "auth": "04pcwy13bvcyjoio6mf6:76f8fa601dd4903be73fad0afb7d42639a33196b88ca91026d9dd2d8459abd85"
+    }
+  },
+  "rows": {},
+  "started_at": 1791895083,
+  "finished_at": 1791895084
+}

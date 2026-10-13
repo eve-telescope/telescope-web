@@ -1,0 +1,39 @@
+{
+  "name": "entries_store_missing",
+  "request": {
+    "method": "POST",
+    "path": "/api/networks/1/entries",
+    "token": 2,
+    "body": {},
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "The entity type field is required. (and 2 more errors)",
+      "errors": {
+        "entity_type": [
+          "The entity type field is required."
+        ],
+        "entity_id": [
+          "The entity id field is required."
+        ],
+        "entity_name": [
+          "The entity name field is required."
+        ]
+      }
+    }
+  },
+  "rows": {},
+  "started_at": 1791894998,
+  "finished_at": 1791894999
+}

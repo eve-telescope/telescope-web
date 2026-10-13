@@ -1,0 +1,49 @@
+{
+  "name": "lookup_viewer",
+  "request": {
+    "method": "GET",
+    "path": "/api/intel/lookup?entity_ids[]=90001001&entity_ids[]=98000777&entity_ids[]=90001002",
+    "token": 3,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": [
+      {
+        "id": 1,
+        "intel_network_id": 1,
+        "network_name": "Alpha Intel",
+        "entity_type": "character",
+        "entity_id": 90001001,
+        "entity_name": "Hostile Hank",
+        "color": "#FF3B3B",
+        "label": "HOSTILE",
+        "notes": null
+      },
+      {
+        "id": 2,
+        "intel_network_id": 1,
+        "network_name": "Alpha Intel",
+        "entity_type": "corporation",
+        "entity_id": 98000777,
+        "entity_name": "Spy Corp",
+        "color": null,
+        "label": "SPY",
+        "notes": "Watch their alts"
+      }
+    ]
+  },
+  "rows": {},
+  "started_at": 1791895019,
+  "finished_at": 1791895020
+}

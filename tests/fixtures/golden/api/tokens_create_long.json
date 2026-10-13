@@ -1,0 +1,35 @@
+{
+  "name": "tokens_create_long",
+  "request": {
+    "method": "POST",
+    "path": "/api/tokens",
+    "token": 1,
+    "body": {
+      "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "The name field must not be greater than 255 characters.",
+      "errors": {
+        "name": [
+          "The name field must not be greater than 255 characters."
+        ]
+      }
+    }
+  },
+  "rows": {},
+  "started_at": 1791894887,
+  "finished_at": 1791894888
+}

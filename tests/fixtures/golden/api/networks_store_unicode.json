@@ -1,0 +1,217 @@
+{
+  "name": "networks_store_unicode",
+  "request": {
+    "method": "POST",
+    "path": "/api/networks",
+    "token": 10,
+    "body": {
+      "name": "  Ørsted & Søn's Ops!  "
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "name": "Ørsted & Søn's Ops!",
+      "slug": "orsted-sons-ops-VC2FTF",
+      "owner_id": 8,
+      "updated_at": "2026-10-13T12:35:06.000000Z",
+      "created_at": "2026-10-13T12:35:06.000000Z",
+      "id": 4,
+      "accesses": [
+        {
+          "id": 12,
+          "intel_network_id": 4,
+          "accessible_type": "App\\Models\\User",
+          "accessible_id": 90000008,
+          "permission": "manager",
+          "is_owner": true,
+          "expires_at": null,
+          "created_at": "2026-10-13T12:35:06.000000Z",
+          "updated_at": "2026-10-13T12:35:06.000000Z"
+        }
+      ]
+    }
+  },
+  "rows": {
+    "intel_networks": [
+      {
+        "id": 1,
+        "name": "Alpha Intel",
+        "slug": "alpha-intel-a1B2c3",
+        "owner_id": 1,
+        "created_at": "2026-10-02 08:00:00",
+        "updated_at": "2026-10-02 08:00:00"
+      },
+      {
+        "id": 2,
+        "name": "Bravo Watch",
+        "slug": "bravo-watch-X9y8Z7",
+        "owner_id": 4,
+        "created_at": "2026-10-02 09:00:00",
+        "updated_at": "2026-10-03 09:00:00"
+      },
+      {
+        "id": 3,
+        "name": "Charlie Ops",
+        "slug": "charlie-ops-Qw3rTy",
+        "owner_id": 2,
+        "created_at": "2026-10-02 10:00:00",
+        "updated_at": "2026-10-02 10:00:00"
+      },
+      {
+        "id": 4,
+        "name": "Ørsted & Søn's Ops!",
+        "slug": "orsted-sons-ops-VC2FTF",
+        "owner_id": 8,
+        "created_at": "2026-10-13 12:35:06",
+        "updated_at": "2026-10-13 12:35:06"
+      }
+    ],
+    "network_access": [
+      {
+        "id": 1,
+        "is_owner": true,
+        "created_at": "2026-10-02 12:00:00",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-02 12:00:00",
+        "accessible_id": 90000001,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 2,
+        "is_owner": false,
+        "created_at": "2026-10-02 13:00:00",
+        "expires_at": null,
+        "permission": "member",
+        "updated_at": "2026-10-02 13:00:00",
+        "accessible_id": 90000002,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 3,
+        "is_owner": false,
+        "created_at": "2026-10-02 14:00:00",
+        "expires_at": null,
+        "permission": "viewer",
+        "updated_at": "2026-10-02 14:00:00",
+        "accessible_id": 90000003,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 4,
+        "is_owner": false,
+        "created_at": "2026-10-02 15:00:00",
+        "expires_at": null,
+        "permission": "viewer",
+        "updated_at": "2026-10-02 15:00:00",
+        "accessible_id": 98000001,
+        "accessible_type": "App\\Models\\Corporation",
+        "intel_network_id": 1
+      },
+      {
+        "id": 5,
+        "is_owner": false,
+        "created_at": "2026-10-02 16:00:00",
+        "expires_at": "2026-10-10 00:00:00",
+        "permission": "member",
+        "updated_at": "2026-10-02 16:00:00",
+        "accessible_id": 90000006,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 6,
+        "is_owner": false,
+        "created_at": "2026-10-02 17:00:00",
+        "expires_at": "2027-01-01 00:00:00",
+        "permission": "viewer",
+        "updated_at": "2026-10-02 17:00:00",
+        "accessible_id": 99000002,
+        "accessible_type": "App\\Models\\Alliance",
+        "intel_network_id": 1
+      },
+      {
+        "id": 7,
+        "is_owner": true,
+        "created_at": "2026-10-02 18:00:00",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-02 18:00:00",
+        "accessible_id": 90000004,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 2
+      },
+      {
+        "id": 8,
+        "is_owner": false,
+        "created_at": "2026-10-02 19:00:00",
+        "expires_at": null,
+        "permission": "member",
+        "updated_at": "2026-10-02 19:00:00",
+        "accessible_id": 99000002,
+        "accessible_type": "App\\Models\\Alliance",
+        "intel_network_id": 2
+      },
+      {
+        "id": 9,
+        "is_owner": true,
+        "created_at": "2026-10-02 20:00:00",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-02 20:00:00",
+        "accessible_id": 90000002,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 3
+      },
+      {
+        "id": 10,
+        "is_owner": false,
+        "created_at": "2026-10-02 21:00:00",
+        "expires_at": null,
+        "permission": "viewer",
+        "updated_at": "2026-10-02 21:00:00",
+        "accessible_id": 90000099,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 11,
+        "is_owner": false,
+        "created_at": "2026-10-02 22:00:00",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-02 22:00:00",
+        "accessible_id": 90000007,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 12,
+        "is_owner": true,
+        "created_at": "2026-10-13 12:35:06",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-13 12:35:06",
+        "accessible_id": 90000008,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 4
+      }
+    ]
+  },
+  "started_at": 1791894906,
+  "finished_at": 1791894907
+}

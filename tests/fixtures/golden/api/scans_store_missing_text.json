@@ -1,0 +1,35 @@
+{
+  "name": "scans_store_missing_text",
+  "request": {
+    "method": "POST",
+    "path": "/api/networks/1/scans",
+    "token": 2,
+    "body": {
+      "scan_type": "local"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "The raw text field is required.",
+      "errors": {
+        "raw_text": [
+          "The raw text field is required."
+        ]
+      }
+    }
+  },
+  "rows": {},
+  "started_at": 1791895041,
+  "finished_at": 1791895042
+}

@@ -1,0 +1,37 @@
+{
+  "name": "scan_event",
+  "steps": [
+    {
+      "client": "a",
+      "connect": "/app/04pcwy13bvcyjoio6mf6?protocol=7&client=js&version=8.4.0&flash=false"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"<socket_id:a>\\\",\\\"activity_timeout\\\":30}\"}"
+    },
+    {
+      "client": "a",
+      "send": "{\"event\":\"pusher:subscribe\",\"data\":{\"auth\":\"<auth:private-intel-network.1>\",\"channel\":\"private-intel-network.1\"}}"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"private-intel-network.1\"}"
+    },
+    {
+      "http": {
+        "method": "POST",
+        "path": "/api/networks/1/scans",
+        "token": 2,
+        "body": {
+          "scan_type": "local",
+          "raw_text": "Pilot One\nPilot Two"
+        }
+      },
+      "status": 201
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"App\\\\Events\\\\ScanShared\",\"data\":\"{\\\"network_id\\\":1,\\\"scan_id\\\":28}\",\"channel\":\"private-intel-network.1\"}"
+    }
+  ]
+}

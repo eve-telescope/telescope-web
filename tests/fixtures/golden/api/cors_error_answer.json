@@ -1,0 +1,30 @@
+{
+  "name": "cors_error_answer",
+  "request": {
+    "method": "GET",
+    "path": "/api/networks",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {
+      "Origin": "tauri://localhost"
+    },
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "Unauthenticated."
+    }
+  },
+  "rows": {},
+  "started_at": 1791895107,
+  "finished_at": 1791895108
+}

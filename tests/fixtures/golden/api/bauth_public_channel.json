@@ -1,0 +1,32 @@
+{
+  "name": "bauth_public_channel",
+  "request": {
+    "method": "POST",
+    "path": "/broadcasting/auth",
+    "token": 1,
+    "body": null,
+    "form": {
+      "socket_id": "123.456",
+      "channel_name": "intel-network.1"
+    },
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "auth": "04pcwy13bvcyjoio6mf6:29dc5a4ad09b4ccf66d307aba9cf7781fb9460f6bd2b9cc1528e53b00269a29e",
+      "channel_data": "{\"user_id\":\"1\",\"user_info\":true}"
+    }
+  },
+  "rows": {},
+  "started_at": 1791895090,
+  "finished_at": 1791895091
+}

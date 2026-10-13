@@ -1,0 +1,98 @@
+[
+  {
+    "input": "Alpha Intel",
+    "slug": "alpha-intel"
+  },
+  {
+    "input": "  Ørsted & Søn's Ops!  ",
+    "slug": "orsted-sons-ops"
+  },
+  {
+    "input": "!!!",
+    "slug": ""
+  },
+  {
+    "input": "Goonswarm Fédération",
+    "slug": "goonswarm-federation"
+  },
+  {
+    "input": "TEST alliance -- please   ignore",
+    "slug": "test-alliance-please-ignore"
+  },
+  {
+    "input": "user@example.com",
+    "slug": "user-at-examplecom"
+  },
+  {
+    "input": "情报网络",
+    "slug": ""
+  },
+  {
+    "input": "Ελληνικά",
+    "slug": "ellinika"
+  },
+  {
+    "input": "Русская разведка",
+    "slug": "russkaia-razvedka"
+  },
+  {
+    "input": "Ünïcode_under_score",
+    "slug": "unicode-under-score"
+  },
+  {
+    "input": "a--b__c",
+    "slug": "a-b-c"
+  },
+  {
+    "input": "100% Pure",
+    "slug": "100-pure"
+  },
+  {
+    "input": "émigré café",
+    "slug": "emigre-cafe"
+  },
+  {
+    "input": "ÆØÅ æøå ß",
+    "slug": "aeoa-aeoa-ss"
+  },
+  {
+    "input": "Đorđe Šćepanović",
+    "slug": "dorde-scepanovic"
+  },
+  {
+    "input": "日本語 テスト",
+    "slug": ""
+  },
+  {
+    "input": "😀 emoji net",
+    "slug": "emoji-net"
+  },
+  {
+    "input": "tab\there",
+    "slug": "tab-here"
+  },
+  {
+    "input": "x/y\\z",
+    "slug": "xyz"
+  },
+  {
+    "input": "C++ & C#",
+    "slug": "c-c"
+  },
+  {
+    "input": "O'Brien's",
+    "slug": "obriens"
+  },
+  {
+    "input": "Zoë-Ägir",
+    "slug": "zoe-agir"
+  },
+  {
+    "input": "İstanbul",
+    "slug": "istanbul"
+  },
+  {
+    "input": "ﬁne ligature",
+    "slug": "fine-ligature"
+  }
+]

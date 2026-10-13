@@ -1,0 +1,31 @@
+{
+  "name": "entries_patch",
+  "request": {
+    "method": "PATCH",
+    "path": "/api/networks/1/entries/1",
+    "token": 2,
+    "body": {
+      "label": "X"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 405,
+    "headers": {
+      "allow": "PUT, DELETE",
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "The PATCH method is not supported for route api/networks/1/entries/1. Supported methods: PUT, DELETE."
+    }
+  },
+  "rows": {},
+  "started_at": 1791895012,
+  "finished_at": 1791895013
+}

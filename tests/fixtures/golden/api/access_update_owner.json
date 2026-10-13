@@ -1,0 +1,30 @@
+{
+  "name": "access_update_owner",
+  "request": {
+    "method": "PUT",
+    "path": "/api/networks/1/access/1",
+    "token": 1,
+    "body": {
+      "permission": "viewer"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "Cannot modify owner access"
+    }
+  },
+  "rows": {},
+  "started_at": 1791894971,
+  "finished_at": 1791894972
+}

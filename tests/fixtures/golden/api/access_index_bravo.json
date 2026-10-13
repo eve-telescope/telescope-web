@@ -1,0 +1,63 @@
+{
+  "name": "access_index_bravo",
+  "request": {
+    "method": "GET",
+    "path": "/api/networks/2/access",
+    "token": 4,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": [
+      {
+        "id": 8,
+        "accessible_type": "alliance",
+        "accessible_id": 99000002,
+        "permission": "member",
+        "is_owner": false,
+        "expires_at": null,
+        "entity": {
+          "id": 99000002,
+          "name": "Test Alliance Please Ignore",
+          "type": "alliance",
+          "ticker": "TEST",
+          "corporation": null,
+          "alliance": null
+        }
+      },
+      {
+        "id": 7,
+        "accessible_type": "character",
+        "accessible_id": 90000004,
+        "permission": "manager",
+        "is_owner": true,
+        "expires_at": null,
+        "entity": {
+          "id": 90000004,
+          "name": "Outsider Pilot",
+          "type": "character",
+          "ticker": null,
+          "corporation": {
+            "id": 98000003,
+            "name": "Solo Corp",
+            "ticker": "SOLO"
+          },
+          "alliance": null
+        }
+      }
+    ]
+  },
+  "rows": {},
+  "started_at": 1791894942,
+  "finished_at": 1791894943
+}

@@ -1,0 +1,30 @@
+{
+  "name": "csrf_cookie",
+  "request": {
+    "method": "GET",
+    "path": "/sanctum/csrf-cookie",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": null,
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 204,
+    "headers": {
+      "vary": "X-Inertia",
+      "set-cookie": [
+        "XSRF-TOKEN",
+        "telescope-session"
+      ]
+    },
+    "json": null,
+    "text": ""
+  },
+  "rows": {},
+  "started_at": 1791894863,
+  "finished_at": 1791894864
+}

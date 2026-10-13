@@ -1,0 +1,32 @@
+{
+  "name": "bauth_presence_channel",
+  "request": {
+    "method": "POST",
+    "path": "/broadcasting/auth",
+    "token": 1,
+    "body": null,
+    "form": {
+      "socket_id": "123.456",
+      "channel_name": "presence-intel-network.1"
+    },
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "auth": "04pcwy13bvcyjoio6mf6:21a46a1c0cab3844c2926cf386e91ce7a7fcb817b61fdccf1bc9042e896f4b40",
+      "channel_data": "{\"user_id\":\"1\",\"user_info\":true}"
+    }
+  },
+  "rows": {},
+  "started_at": 1791895091,
+  "finished_at": 1791895092
+}

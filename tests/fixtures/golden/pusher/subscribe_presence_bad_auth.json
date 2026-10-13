@@ -1,0 +1,21 @@
+{
+  "name": "subscribe_presence_bad_auth",
+  "steps": [
+    {
+      "client": "a",
+      "connect": "/app/04pcwy13bvcyjoio6mf6?protocol=7&client=js&version=8.4.0&flash=false"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"<socket_id:a>\\\",\\\"activity_timeout\\\":30}\"}"
+    },
+    {
+      "client": "a",
+      "send": "{\"event\":\"pusher:subscribe\",\"data\":{\"auth\":\"04pcwy13bvcyjoio6mf6:bad\",\"channel_data\":\"{\\\"user_id\\\":1}\",\"channel\":\"presence-intel-network.1\"}}"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:error\",\"data\":\"{\\\"code\\\":4009,\\\"message\\\":\\\"Connection is unauthorized\\\"}\"}"
+    }
+  ]
+}

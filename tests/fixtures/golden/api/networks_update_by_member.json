@@ -1,0 +1,30 @@
+{
+  "name": "networks_update_by_member",
+  "request": {
+    "method": "PUT",
+    "path": "/api/networks/1",
+    "token": 2,
+    "body": {
+      "name": "Hacked"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "This action is unauthorized."
+    }
+  },
+  "rows": {},
+  "started_at": 1791894931,
+  "finished_at": 1791894932
+}

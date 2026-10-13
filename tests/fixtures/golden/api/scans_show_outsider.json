@@ -1,0 +1,28 @@
+{
+  "name": "scans_show_outsider",
+  "request": {
+    "method": "GET",
+    "path": "/api/networks/1/scans/1",
+    "token": 4,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "This action is unauthorized."
+    }
+  },
+  "rows": {},
+  "started_at": 1791895047,
+  "finished_at": 1791895048
+}

@@ -1,0 +1,60 @@
+{
+  "name": "lookup_ally",
+  "request": {
+    "method": "GET",
+    "path": "/api/intel/lookup?entity_ids[]=90001001&entity_ids[]=90001002&entity_ids[]=90001003",
+    "token": 7,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": [
+      {
+        "id": 1,
+        "intel_network_id": 1,
+        "network_name": "Alpha Intel",
+        "entity_type": "character",
+        "entity_id": 90001001,
+        "entity_name": "Hostile Hank",
+        "color": "#FF3B3B",
+        "label": "HOSTILE",
+        "notes": null
+      },
+      {
+        "id": 4,
+        "intel_network_id": 2,
+        "network_name": "Bravo Watch",
+        "entity_type": "character",
+        "entity_id": 90001001,
+        "entity_name": "Hostile Hank",
+        "color": "#44DDAA",
+        "label": "FRIENDLY",
+        "notes": null
+      },
+      {
+        "id": 5,
+        "intel_network_id": 2,
+        "network_name": "Bravo Watch",
+        "entity_type": "character",
+        "entity_id": 90001002,
+        "entity_name": "Neutral Ned",
+        "color": null,
+        "label": null,
+        "notes": "Seen in Jita"
+      }
+    ]
+  },
+  "rows": {},
+  "started_at": 1791895021,
+  "finished_at": 1791895022
+}

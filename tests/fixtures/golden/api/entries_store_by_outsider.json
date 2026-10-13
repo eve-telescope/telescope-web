@@ -1,0 +1,35 @@
+{
+  "name": "entries_store_by_outsider",
+  "request": {
+    "method": "POST",
+    "path": "/api/networks/1/entries",
+    "token": 4,
+    "body": {
+      "entity_type": "character",
+      "entity_id": 90001010,
+      "entity_name": "New Target",
+      "color": "#FF3B3B",
+      "label": "HOSTILE",
+      "notes": null
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "This action is unauthorized."
+    }
+  },
+  "rows": {},
+  "started_at": 1791894996,
+  "finished_at": 1791894997
+}

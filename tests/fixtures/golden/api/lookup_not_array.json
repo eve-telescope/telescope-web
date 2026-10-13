@@ -1,0 +1,33 @@
+{
+  "name": "lookup_not_array",
+  "request": {
+    "method": "GET",
+    "path": "/api/intel/lookup?entity_ids=90001001",
+    "token": 3,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "The entity ids field must be an array.",
+      "errors": {
+        "entity_ids": [
+          "The entity ids field must be an array."
+        ]
+      }
+    }
+  },
+  "rows": {},
+  "started_at": 1791895025,
+  "finished_at": 1791895026
+}

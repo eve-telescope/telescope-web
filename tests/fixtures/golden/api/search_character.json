@@ -1,0 +1,43 @@
+{
+  "name": "search_character",
+  "request": {
+    "method": "GET",
+    "path": "/api/search?query=Owner&category=character",
+    "token": 1,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": [
+      {
+        "id": 90000001,
+        "name": "Owner Pilot",
+        "category": "character",
+        "ticker": null,
+        "corporation": {
+          "id": 98000001,
+          "name": "Karmafleet",
+          "ticker": "KARMA"
+        },
+        "alliance": {
+          "id": 99000001,
+          "name": "Goonswarm Fédération",
+          "ticker": "CONDI"
+        }
+      }
+    ]
+  },
+  "rows": {},
+  "started_at": 1791895049,
+  "finished_at": 1791895050
+}

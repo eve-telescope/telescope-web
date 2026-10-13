@@ -1,0 +1,33 @@
+{
+  "name": "share_store_missing",
+  "request": {
+    "method": "POST",
+    "path": "/api/share",
+    "token": null,
+    "body": {},
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "The pilots field is required.",
+      "errors": {
+        "pilots": [
+          "The pilots field is required."
+        ]
+      }
+    }
+  },
+  "rows": {},
+  "started_at": 1791895069,
+  "finished_at": 1791895070
+}

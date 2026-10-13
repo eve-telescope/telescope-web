@@ -1,0 +1,82 @@
+{
+  "name": "scans_index_bravo",
+  "request": {
+    "method": "GET",
+    "path": "/api/networks/2/scans",
+    "token": 7,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "current_page": 1,
+      "data": [
+        {
+          "id": 27,
+          "scan_type": "local",
+          "raw_text": "Bravo pilot 1",
+          "solar_system": "Amarr",
+          "created_at": "2026-10-06T13:00:00+00:00",
+          "submitted_by": {
+            "id": 90000004,
+            "character_name": "Outsider Pilot"
+          }
+        },
+        {
+          "id": 26,
+          "scan_type": "local",
+          "raw_text": "Bravo pilot 0",
+          "solar_system": "Amarr",
+          "created_at": "2026-10-06T12:00:00+00:00",
+          "submitted_by": {
+            "id": 90000004,
+            "character_name": "Outsider Pilot"
+          }
+        }
+      ],
+      "first_page_url": "https://eve-telescope.com/api/networks/2/scans?page=1",
+      "from": 1,
+      "last_page": 1,
+      "last_page_url": "https://eve-telescope.com/api/networks/2/scans?page=1",
+      "links": [
+        {
+          "url": null,
+          "label": "&laquo; Previous",
+          "page": null,
+          "active": false
+        },
+        {
+          "url": "https://eve-telescope.com/api/networks/2/scans?page=1",
+          "label": "1",
+          "page": 1,
+          "active": true
+        },
+        {
+          "url": null,
+          "label": "Next &raquo;",
+          "page": null,
+          "active": false
+        }
+      ],
+      "next_page_url": null,
+      "path": "https://eve-telescope.com/api/networks/2/scans",
+      "per_page": 20,
+      "prev_page_url": null,
+      "to": 2,
+      "total": 2
+    }
+  },
+  "rows": {},
+  "started_at": 1791895033,
+  "finished_at": 1791895034
+}

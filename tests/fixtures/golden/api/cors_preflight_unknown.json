@@ -1,0 +1,35 @@
+{
+  "name": "cors_preflight_unknown",
+  "request": {
+    "method": "OPTIONS",
+    "path": "/api/nope/deeper",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": null,
+    "headers": {
+      "Origin": "http://x.test",
+      "Access-Control-Request-Method": "DELETE",
+      "Access-Control-Request-Headers": "x-custom"
+    },
+    "inertia": false,
+    "json_type": false
+  },
+  "response": {
+    "status": 204,
+    "headers": {
+      "access-control-allow-origin": "*",
+      "vary": "Access-Control-Request-Method, Access-Control-Request-Headers",
+      "access-control-allow-methods": "DELETE",
+      "access-control-allow-headers": "x-custom",
+      "access-control-max-age": "0",
+      "content-type": "text/html; charset=UTF-8"
+    },
+    "json": null,
+    "text": ""
+  },
+  "rows": {},
+  "started_at": 1791895104,
+  "finished_at": 1791895105
+}

@@ -1,0 +1,34 @@
+{
+  "name": "cors_preflight_api",
+  "request": {
+    "method": "OPTIONS",
+    "path": "/api/networks",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": null,
+    "headers": {
+      "Origin": "http://tauri.localhost",
+      "Access-Control-Request-Method": "get"
+    },
+    "inertia": false,
+    "json_type": false
+  },
+  "response": {
+    "status": 204,
+    "headers": {
+      "access-control-allow-origin": "*",
+      "vary": "Access-Control-Request-Method, Access-Control-Request-Headers",
+      "access-control-allow-methods": "GET",
+      "access-control-allow-headers": "",
+      "access-control-max-age": "0",
+      "content-type": "text/html; charset=UTF-8"
+    },
+    "json": null,
+    "text": ""
+  },
+  "rows": {},
+  "started_at": 1791895103,
+  "finished_at": 1791895104
+}

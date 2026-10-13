@@ -1,0 +1,21 @@
+{
+  "name": "subscribe_presence",
+  "steps": [
+    {
+      "client": "a",
+      "connect": "/app/04pcwy13bvcyjoio6mf6?protocol=7&client=js&version=8.4.0&flash=false"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"<socket_id:a>\\\",\\\"activity_timeout\\\":30}\"}"
+    },
+    {
+      "client": "a",
+      "send": "{\"event\":\"pusher:subscribe\",\"data\":{\"auth\":\"<auth:presence-intel-network.1>\",\"channel_data\":\"{\\\"user_id\\\":\\\"1\\\",\\\"user_info\\\":true}\",\"channel\":\"presence-intel-network.1\"}}"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{\\\"presence\\\":{\\\"count\\\":1,\\\"ids\\\":[\\\"1\\\"],\\\"hash\\\":{\\\"1\\\":true}}}\",\"channel\":\"presence-intel-network.1\"}"
+    }
+  ]
+}

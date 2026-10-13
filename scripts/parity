@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# The parity report: passing over total for each suite (cargo test,
+# vitest, Playwright) and overall. Playwright needs the stack
+# (`docker compose up --build -d`); without it the suite counts as not
+# passing, with its total taken from `playwright test --list`.
+#
+#   scripts/parity            run everything
+#   E2E_BASE_URL=... scripts/parity
+set -uo pipefail
+
+repo=$(cd "$(dirname "$0")/.." && pwd)
+base=${E2E_BASE_URL:-http://localhost:5318}
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# cargo: the "test result" lines of every test binary.
+(cd "$repo" && cargo test --all-targets --no-fail-fast >"$tmp/cargo.txt" 2>&1)
+read -r rust_passed rust_failed < <(
+  grep -E '^test result:' "$tmp/cargo.txt" |
+    sed -E 's/.* ([0-9]+) passed; ([0-9]+) failed.*/\1 \2/' |
+    awk '{ p += $1; f += $2 } END { print p + 0, f + 0 }'
+)
+rust_total=$((rust_passed + rust_failed))
+if [ "$rust_total" -eq 0 ]; then
+  echo "cargo test did not run (see below)" >&2
+  tail -20 "$tmp/cargo.txt" >&2
+fi
+
+# vitest: the JSON reporter's counts.
+(cd "$repo/frontend" && npx vitest run --reporter=json --outputFile="$tmp/vitest.json" >/dev/null 2>&1)
+vitest_passed=$(jq '.numPassedTests' "$tmp/vitest.json" 2>/dev/null || echo 0)
+vitest_total=$(jq '.numTotalTests' "$tmp/vitest.json" 2>/dev/null || echo 0)
+
+# Playwright: against the running stack, or listed only.
+e2e_total=$(cd "$repo/frontend" && npx playwright test --list 2>/dev/null | sed -nE 's/^Total: ([0-9]+) tests?.*/\1/p')
+e2e_total=${e2e_total:-0}
+e2e_passed=0
+e2e_note=""
+if curl -fs "$base/up" >/dev/null 2>&1; then
+  (cd "$repo/frontend" && E2E_BASE_URL="$base" PLAYWRIGHT_JSON_OUTPUT_NAME="$tmp/e2e.json" \
+    npx playwright test --reporter=json >/dev/null 2>&1)
+  e2e_passed=$(jq '.stats.expected' "$tmp/e2e.json" 2>/dev/null || echo 0)
+else
+  e2e_note="  (stack not running at $base)"
+fi
+
+passed=$((rust_passed + vitest_passed + e2e_passed))
+total=$((rust_total + vitest_total + e2e_total))
+printf '%-12s %7s %7s\n' suite passing total
+printf '%-12s %7d %7d\n' rust "$rust_passed" "$rust_total"
+printf '%-12s %7d %7d\n' vitest "$vitest_passed" "$vitest_total"
+printf '%-12s %7d %7d%s\n' playwright "$e2e_passed" "$e2e_total" "$e2e_note"
+printf '%-12s %7d %7d  (%d%%)\n' total "$passed" "$total" $((total ? passed * 100 / total : 0))
+[ "$passed" -eq "$total" ]

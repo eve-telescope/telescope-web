@@ -1,0 +1,49 @@
+{
+  "name": "access_store_bad_values",
+  "request": {
+    "method": "POST",
+    "path": "/api/networks/1/access",
+    "token": 1,
+    "body": {
+      "accessible_type": "ship",
+      "accessible_id": "x1",
+      "accessible_name": [
+        "a"
+      ],
+      "permission": "admin"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "The selected accessible type is invalid. (and 3 more errors)",
+      "errors": {
+        "accessible_type": [
+          "The selected accessible type is invalid."
+        ],
+        "accessible_id": [
+          "The accessible id field must be an integer."
+        ],
+        "accessible_name": [
+          "The accessible name field must be a string."
+        ],
+        "permission": [
+          "The selected permission is invalid."
+        ]
+      }
+    }
+  },
+  "rows": {},
+  "started_at": 1791894963,
+  "finished_at": 1791894964
+}

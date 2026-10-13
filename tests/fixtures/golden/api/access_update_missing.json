@@ -1,0 +1,30 @@
+{
+  "name": "access_update_missing",
+  "request": {
+    "method": "PUT",
+    "path": "/api/networks/1/access/999",
+    "token": 1,
+    "body": {
+      "permission": "viewer"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "No query results for model [App\\Models\\NetworkAccess] 999"
+    }
+  },
+  "rows": {},
+  "started_at": 1791894976,
+  "finished_at": 1791894977
+}

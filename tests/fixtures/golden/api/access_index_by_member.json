@@ -1,0 +1,28 @@
+{
+  "name": "access_index_by_member",
+  "request": {
+    "method": "GET",
+    "path": "/api/networks/1/access",
+    "token": 2,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "This action is unauthorized."
+    }
+  },
+  "rows": {},
+  "started_at": 1791894943,
+  "finished_at": 1791894944
+}

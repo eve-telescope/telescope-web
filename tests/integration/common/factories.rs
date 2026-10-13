@@ -19,6 +19,24 @@ pub struct User {
     pub id: i64,
     pub character_id: i64,
     pub character_name: String,
+    pub corporation_id: Option<i64>,
+    pub alliance_id: Option<i64>,
+}
+
+impl User {
+    /// The user model's JSON, for a user the factory made at `DEFAULT_NOW`.
+    pub fn json(&self) -> Value {
+        json!({
+            "id": self.id,
+            "character_id": self.character_id,
+            "character_name": self.character_name,
+            "corporation_id": self.corporation_id,
+            "alliance_id": self.alliance_id,
+            "last_active_at": null,
+            "created_at": super::NOW_Z,
+            "updated_at": super::NOW_Z,
+        })
+    }
 }
 
 /// `User::factory()->create([...])`.
@@ -128,6 +146,8 @@ impl TestApp {
             id,
             character_id,
             character_name,
+            corporation_id: user.corporation_id,
+            alliance_id: user.alliance_id,
         }
     }
 

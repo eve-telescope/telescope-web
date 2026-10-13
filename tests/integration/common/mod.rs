@@ -7,6 +7,7 @@
 #![allow(dead_code)]
 
 pub mod factories;
+pub mod golden;
 pub mod mocks;
 pub mod socket;
 
@@ -41,6 +42,10 @@ pub const EVE_CLIENT_SECRET: &str = "test-client-secret";
 
 /// The moment the ported PHP tests run at (they used `now()`).
 pub const DEFAULT_NOW: OffsetDateTime = datetime!(2026-10-13 08:30:00 UTC);
+/// `DEFAULT_NOW` as a model serializes it.
+pub const NOW_Z: &str = "2026-10-13T08:30:00.000000Z";
+/// `DEFAULT_NOW` as `toIso8601String()` writes it.
+pub const NOW_ISO: &str = "2026-10-13T08:30:00+00:00";
 
 pub fn repo_path(relative: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join(relative)

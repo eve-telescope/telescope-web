@@ -1,0 +1,42 @@
+{
+  "name": "server_ping",
+  "steps": [
+    {
+      "client": "a",
+      "connect": "/app/04pcwy13bvcyjoio6mf6?protocol=7&client=js&version=8.4.0&flash=false"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"<socket_id:a>\\\",\\\"activity_timeout\\\":30}\"}"
+    },
+    {
+      "client": "a",
+      "send": "{\"event\":\"pusher:subscribe\",\"data\":{\"auth\":\"<auth:private-intel-network.1>\",\"channel\":\"private-intel-network.1\"}}"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"private-intel-network.1\"}"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:ping\"}"
+    },
+    {
+      "note": "after 6 s"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:error\",\"data\":\"{\\\"code\\\":4201,\\\"message\\\":\\\"Pong reply not received in time\\\"}\"}"
+    },
+    {
+      "note": "after 66 s"
+    },
+    {
+      "client": "a",
+      "closed": {
+        "code": 1006,
+        "reason": ""
+      }
+    }
+  ]
+}

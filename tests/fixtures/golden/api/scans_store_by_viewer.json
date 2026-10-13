@@ -1,0 +1,31 @@
+{
+  "name": "scans_store_by_viewer",
+  "request": {
+    "method": "POST",
+    "path": "/api/networks/1/scans",
+    "token": 3,
+    "body": {
+      "scan_type": "local",
+      "raw_text": "Pilot One"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "This action is unauthorized."
+    }
+  },
+  "rows": {},
+  "started_at": 1791895039,
+  "finished_at": 1791895040
+}

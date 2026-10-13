@@ -1,0 +1,39 @@
+{
+  "name": "search_character_accent",
+  "request": {
+    "method": "GET",
+    "path": "/api/search?query=jose&category=character",
+    "token": 1,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": [
+      {
+        "id": 90000008,
+        "name": "José Ørsted",
+        "category": "character",
+        "ticker": null,
+        "corporation": {
+          "id": 98000005,
+          "name": "100% Pure_Corp",
+          "ticker": "PURE"
+        },
+        "alliance": null
+      }
+    ]
+  },
+  "rows": {},
+  "started_at": 1791895051,
+  "finished_at": 1791895052
+}

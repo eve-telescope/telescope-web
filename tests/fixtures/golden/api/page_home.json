@@ -1,0 +1,48 @@
+{
+  "name": "page_home",
+  "request": {
+    "method": "GET",
+    "path": "/",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": null,
+    "headers": {},
+    "inertia": true,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "vary": "X-Inertia",
+      "set-cookie": [
+        "XSRF-TOKEN",
+        "telescope-session"
+      ]
+    },
+    "json": {
+      "component": "Welcome",
+      "props": {
+        "errors": {},
+        "name": "Telescope",
+        "auth": {
+          "user": null
+        },
+        "appVersion": "v0.5.1"
+      },
+      "url": "/",
+      "version": "929a54f74533d0b583f6fee7b2206d78",
+      "sharedProps": [
+        "errors",
+        "name",
+        "auth",
+        "appVersion"
+      ]
+    }
+  },
+  "rows": {},
+  "started_at": 1791894850,
+  "finished_at": 1791894851
+}

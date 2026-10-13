@@ -1,0 +1,31 @@
+{
+  "name": "eve_redirect_desktop",
+  "request": {
+    "method": "GET",
+    "path": "/eve?desktop",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": null,
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 302,
+    "headers": {
+      "location": "https://login.eveonline.com/v2/oauth/authorize/?client_id=reference-client-id&redirect_uri=https%3A%2F%2Feve-telescope.com%2Feve%2Fcallback&scope=&response_type=code&state=siVCalnbb5W3jJ4o5SqgVlFE7mDV4svKmNNuOHcu",
+      "content-type": "text/html; charset=utf-8",
+      "vary": "X-Inertia",
+      "set-cookie": [
+        "XSRF-TOKEN",
+        "telescope-session"
+      ]
+    },
+    "text": "<!DOCTYPE html>\n<html>\n    <head>\n        <meta charset=\"UTF-8\" />\n        <meta http-equiv=\"refresh\" content=\"0;url='https://login.eveonline.com/v2/oauth/authorize/?client_id=reference-client-id&amp;redirect_uri=https%3A%2F%2Feve-telescope.com%2Feve%2Fcallback&amp;scope=&amp;response_type=code&amp;state=siVCalnbb5W3jJ4o5SqgVlFE7mDV4svKmNNuOHcu'\" />\n\n        <title>Redirecting to https://login.eveonline.com/v2/oauth/authorize/?client_id=reference-client-id&amp;redirect_uri=https%3A%2F%2Feve-telescope.com%2Feve%2Fcallback&amp;scope=&amp;response_type=code&amp;state=siVCalnbb5W3jJ4o5SqgVlFE7mDV4svKmNNuOHcu</title>\n    </head>\n    <body>\n        Redirecting to <a href=\"https://login.eveonline.com/v2/oauth/authorize/?client_id=reference-client-id&amp;redirect_uri=https%3A%2F%2Feve-telescope.com%2Feve%2Fcallback&amp;scope=&amp;response_type=code&amp;state=siVCalnbb5W3jJ4o5SqgVlFE7mDV4svKmNNuOHcu\">https://login.eveonline.com/v2/oauth/authorize/?client_id=reference-client-id&amp;redirect_uri=https%3A%2F%2Feve-telescope.com%2Feve%2Fcallback&amp;scope=&amp;response_type=code&amp;state=siVCalnbb5W3jJ4o5SqgVlFE7mDV4svKmNNuOHcu</a>.\n    </body>\n</html>"
+  },
+  "rows": {},
+  "started_at": 1791894860,
+  "finished_at": 1791894861
+}

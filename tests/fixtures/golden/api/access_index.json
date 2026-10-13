@@ -1,0 +1,176 @@
+{
+  "name": "access_index",
+  "request": {
+    "method": "GET",
+    "path": "/api/networks/1/access",
+    "token": 1,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": [
+      {
+        "id": 6,
+        "accessible_type": "alliance",
+        "accessible_id": 99000002,
+        "permission": "viewer",
+        "is_owner": false,
+        "expires_at": "2027-01-01T00:00:00+00:00",
+        "entity": {
+          "id": 99000002,
+          "name": "Test Alliance Please Ignore",
+          "type": "alliance",
+          "ticker": "TEST",
+          "corporation": null,
+          "alliance": null
+        }
+      },
+      {
+        "id": 4,
+        "accessible_type": "corporation",
+        "accessible_id": 98000001,
+        "permission": "viewer",
+        "is_owner": false,
+        "expires_at": null,
+        "entity": {
+          "id": 98000001,
+          "name": "Karmafleet",
+          "type": "corporation",
+          "ticker": "KARMA",
+          "corporation": null,
+          "alliance": {
+            "id": 99000001,
+            "name": "Goonswarm Fédération",
+            "ticker": "CONDI"
+          }
+        }
+      },
+      {
+        "id": 1,
+        "accessible_type": "character",
+        "accessible_id": 90000001,
+        "permission": "manager",
+        "is_owner": true,
+        "expires_at": null,
+        "entity": {
+          "id": 90000001,
+          "name": "Owner Pilot",
+          "type": "character",
+          "ticker": null,
+          "corporation": {
+            "id": 98000001,
+            "name": "Karmafleet",
+            "ticker": "KARMA"
+          },
+          "alliance": {
+            "id": 99000001,
+            "name": "Goonswarm Fédération",
+            "ticker": "CONDI"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "accessible_type": "character",
+        "accessible_id": 90000002,
+        "permission": "member",
+        "is_owner": false,
+        "expires_at": null,
+        "entity": {
+          "id": 90000002,
+          "name": "Member Pilot",
+          "type": "character",
+          "ticker": null,
+          "corporation": {
+            "id": 98000002,
+            "name": "Test Corp",
+            "ticker": "TSTC"
+          },
+          "alliance": {
+            "id": 99000002,
+            "name": "Test Alliance Please Ignore",
+            "ticker": "TEST"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "accessible_type": "character",
+        "accessible_id": 90000003,
+        "permission": "viewer",
+        "is_owner": false,
+        "expires_at": null,
+        "entity": {
+          "id": 90000003,
+          "name": "Viewer Pilot",
+          "type": "character",
+          "ticker": null,
+          "corporation": null,
+          "alliance": null
+        }
+      },
+      {
+        "id": 5,
+        "accessible_type": "character",
+        "accessible_id": 90000006,
+        "permission": "member",
+        "is_owner": false,
+        "expires_at": "2026-10-10T00:00:00+00:00",
+        "entity": {
+          "id": 90000006,
+          "name": "Lapsed Pilot",
+          "type": "character",
+          "ticker": null,
+          "corporation": null,
+          "alliance": null
+        }
+      },
+      {
+        "id": 11,
+        "accessible_type": "character",
+        "accessible_id": 90000007,
+        "permission": "manager",
+        "is_owner": false,
+        "expires_at": null,
+        "entity": {
+          "id": 90000007,
+          "name": "Ally Pilot",
+          "type": "character",
+          "ticker": null,
+          "corporation": {
+            "id": 98000004,
+            "name": "Ally Corp",
+            "ticker": "ALLY"
+          },
+          "alliance": {
+            "id": 99000002,
+            "name": "Test Alliance Please Ignore",
+            "ticker": "TEST"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "accessible_type": "character",
+        "accessible_id": 90000099,
+        "permission": "viewer",
+        "is_owner": false,
+        "expires_at": null,
+        "entity": null
+      }
+    ]
+  },
+  "rows": {},
+  "started_at": 1791894940,
+  "finished_at": 1791894941
+}

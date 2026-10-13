@@ -1,0 +1,34 @@
+{
+  "name": "share_fetch_lower_case",
+  "request": {
+    "method": "GET",
+    "path": "/api/share/abcdefgh",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "code": "ABCDEFGH",
+      "pilots": [
+        "Pilot One",
+        "Pilot Two",
+        "Pilot Three"
+      ],
+      "pilotCount": 3
+    }
+  },
+  "rows": {},
+  "started_at": 1791895075,
+  "finished_at": 1791895076
+}

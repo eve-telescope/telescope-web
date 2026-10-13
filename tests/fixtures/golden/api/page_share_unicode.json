@@ -1,0 +1,60 @@
+{
+  "name": "page_share_unicode",
+  "request": {
+    "method": "GET",
+    "path": "/s/Unic0de1",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": null,
+    "headers": {},
+    "inertia": true,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json",
+      "vary": "X-Inertia",
+      "set-cookie": [
+        "XSRF-TOKEN",
+        "telescope-session"
+      ]
+    },
+    "json": {
+      "component": "Share",
+      "props": {
+        "errors": {},
+        "name": "Telescope",
+        "auth": {
+          "user": null
+        },
+        "appVersion": "v0.5.1",
+        "share": {
+          "code": "Unic0de1",
+          "pilots": [
+            "José Ørsted",
+            "Ålesund Ünïcode",
+            "Back\\slash \"Quote\"",
+            "a/b"
+          ],
+          "pilotCount": 4,
+          "views": 13,
+          "createdAt": "2026-10-07T09:15:00.000000Z"
+        }
+      },
+      "url": "/s/Unic0de1",
+      "version": "929a54f74533d0b583f6fee7b2206d78",
+      "sharedProps": [
+        "errors",
+        "name",
+        "auth",
+        "appVersion"
+      ]
+    }
+  },
+  "rows": {},
+  "started_at": 1791894853,
+  "finished_at": 1791894854
+}

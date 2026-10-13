@@ -1,0 +1,28 @@
+{
+  "name": "unknown_api_json",
+  "request": {
+    "method": "GET",
+    "path": "/api/nope",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "The route api/nope could not be found."
+    }
+  },
+  "rows": {},
+  "started_at": 1791894870,
+  "finished_at": 1791894871
+}

@@ -1,0 +1,49 @@
+{
+  "name": "client_event",
+  "steps": [
+    {
+      "client": "a",
+      "connect": "/app/04pcwy13bvcyjoio6mf6?protocol=7&client=js&version=8.4.0&flash=false"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"<socket_id:a>\\\",\\\"activity_timeout\\\":30}\"}"
+    },
+    {
+      "client": "b",
+      "connect": "/app/04pcwy13bvcyjoio6mf6?protocol=7&client=js&version=8.4.0&flash=false"
+    },
+    {
+      "client": "b",
+      "receive": "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"<socket_id:b>\\\",\\\"activity_timeout\\\":30}\"}"
+    },
+    {
+      "client": "a",
+      "send": "{\"event\":\"pusher:subscribe\",\"data\":{\"auth\":\"<auth:private-intel-network.1>\",\"channel\":\"private-intel-network.1\"}}"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"private-intel-network.1\"}"
+    },
+    {
+      "client": "b",
+      "send": "{\"event\":\"pusher:subscribe\",\"data\":{\"auth\":\"<auth:private-intel-network.1>\",\"channel\":\"private-intel-network.1\"}}"
+    },
+    {
+      "client": "b",
+      "receive": "{\"event\":\"pusher_internal:subscription_succeeded\",\"data\":\"{}\",\"channel\":\"private-intel-network.1\"}"
+    },
+    {
+      "client": "a",
+      "send": "{\"event\":\"client-typing\",\"data\":{\"x\":1},\"channel\":\"private-intel-network.1\"}"
+    },
+    {
+      "client": "a",
+      "silent": 1000
+    },
+    {
+      "client": "b",
+      "receive": "{\"event\":\"client-typing\",\"channel\":\"private-intel-network.1\",\"data\":{\"x\":1}}"
+    }
+  ]
+}

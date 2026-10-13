@@ -1,0 +1,30 @@
+{
+  "name": "entries_update_by_viewer",
+  "request": {
+    "method": "PUT",
+    "path": "/api/networks/1/entries/1",
+    "token": 3,
+    "body": {
+      "label": "X"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 403,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "message": "This action is unauthorized."
+    }
+  },
+  "rows": {},
+  "started_at": 1791895009,
+  "finished_at": 1791895010
+}

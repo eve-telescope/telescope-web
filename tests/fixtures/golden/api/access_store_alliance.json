@@ -1,0 +1,181 @@
+{
+  "name": "access_store_alliance",
+  "request": {
+    "method": "POST",
+    "path": "/api/networks/1/access",
+    "token": 1,
+    "body": {
+      "accessible_type": "alliance",
+      "accessible_id": 99000001,
+      "accessible_name": "Goonswarm",
+      "permission": "manager"
+    },
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    },
+    "json": {
+      "id": 12,
+      "accessible_type": "alliance",
+      "accessible_id": 99000001,
+      "permission": "manager",
+      "is_owner": false,
+      "expires_at": null,
+      "entity": {
+        "id": 99000001,
+        "name": "Goonswarm Fédération",
+        "type": "alliance",
+        "ticker": "CONDI",
+        "corporation": null,
+        "alliance": null
+      }
+    }
+  },
+  "rows": {
+    "network_access": [
+      {
+        "id": 1,
+        "is_owner": true,
+        "created_at": "2026-10-02 12:00:00",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-02 12:00:00",
+        "accessible_id": 90000001,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 2,
+        "is_owner": false,
+        "created_at": "2026-10-02 13:00:00",
+        "expires_at": null,
+        "permission": "member",
+        "updated_at": "2026-10-02 13:00:00",
+        "accessible_id": 90000002,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 3,
+        "is_owner": false,
+        "created_at": "2026-10-02 14:00:00",
+        "expires_at": null,
+        "permission": "viewer",
+        "updated_at": "2026-10-02 14:00:00",
+        "accessible_id": 90000003,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 4,
+        "is_owner": false,
+        "created_at": "2026-10-02 15:00:00",
+        "expires_at": null,
+        "permission": "viewer",
+        "updated_at": "2026-10-02 15:00:00",
+        "accessible_id": 98000001,
+        "accessible_type": "App\\Models\\Corporation",
+        "intel_network_id": 1
+      },
+      {
+        "id": 5,
+        "is_owner": false,
+        "created_at": "2026-10-02 16:00:00",
+        "expires_at": "2026-10-10 00:00:00",
+        "permission": "member",
+        "updated_at": "2026-10-02 16:00:00",
+        "accessible_id": 90000006,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 6,
+        "is_owner": false,
+        "created_at": "2026-10-02 17:00:00",
+        "expires_at": "2027-01-01 00:00:00",
+        "permission": "viewer",
+        "updated_at": "2026-10-02 17:00:00",
+        "accessible_id": 99000002,
+        "accessible_type": "App\\Models\\Alliance",
+        "intel_network_id": 1
+      },
+      {
+        "id": 7,
+        "is_owner": true,
+        "created_at": "2026-10-02 18:00:00",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-02 18:00:00",
+        "accessible_id": 90000004,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 2
+      },
+      {
+        "id": 8,
+        "is_owner": false,
+        "created_at": "2026-10-02 19:00:00",
+        "expires_at": null,
+        "permission": "member",
+        "updated_at": "2026-10-02 19:00:00",
+        "accessible_id": 99000002,
+        "accessible_type": "App\\Models\\Alliance",
+        "intel_network_id": 2
+      },
+      {
+        "id": 9,
+        "is_owner": true,
+        "created_at": "2026-10-02 20:00:00",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-02 20:00:00",
+        "accessible_id": 90000002,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 3
+      },
+      {
+        "id": 10,
+        "is_owner": false,
+        "created_at": "2026-10-02 21:00:00",
+        "expires_at": null,
+        "permission": "viewer",
+        "updated_at": "2026-10-02 21:00:00",
+        "accessible_id": 90000099,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 11,
+        "is_owner": false,
+        "created_at": "2026-10-02 22:00:00",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-02 22:00:00",
+        "accessible_id": 90000007,
+        "accessible_type": "App\\Models\\User",
+        "intel_network_id": 1
+      },
+      {
+        "id": 12,
+        "is_owner": false,
+        "created_at": "2026-10-13 12:35:47",
+        "expires_at": null,
+        "permission": "manager",
+        "updated_at": "2026-10-13 12:35:47",
+        "accessible_id": 99000001,
+        "accessible_type": "App\\Models\\Alliance",
+        "intel_network_id": 1
+      }
+    ]
+  },
+  "started_at": 1791894947,
+  "finished_at": 1791894948
+}

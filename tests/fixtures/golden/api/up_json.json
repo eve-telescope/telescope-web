@@ -1,0 +1,27 @@
+{
+  "name": "up_json",
+  "request": {
+    "method": "GET",
+    "path": "/up",
+    "token": null,
+    "body": null,
+    "form": null,
+    "raw": null,
+    "accept": "application/json",
+    "headers": {},
+    "inertia": false,
+    "json_type": true
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "json": {
+      "status": "up"
+    }
+  },
+  "rows": {},
+  "started_at": 1791894865,
+  "finished_at": 1791894866
+}

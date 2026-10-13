@@ -1,0 +1,21 @@
+{
+  "name": "subscribe_without_channel",
+  "steps": [
+    {
+      "client": "a",
+      "connect": "/app/04pcwy13bvcyjoio6mf6?protocol=7&client=js&version=8.4.0&flash=false"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:connection_established\",\"data\":\"{\\\"socket_id\\\":\\\"<socket_id:a>\\\",\\\"activity_timeout\\\":30}\"}"
+    },
+    {
+      "client": "a",
+      "send": "{\"event\":\"pusher:subscribe\",\"data\":{}}"
+    },
+    {
+      "client": "a",
+      "receive": "{\"event\":\"pusher:error\",\"data\":\"{\\\"code\\\":4200,\\\"message\\\":\\\"Invalid message format\\\"}\"}"
+    }
+  ]
+}
