@@ -24,6 +24,25 @@ CORS on `/api/*` and `/broadcasting/auth` for the Tauri clients. The
 v0.5 client updates entries with PATCH and falls back to PUT on 405, so
 PATCH must stay 405. Change none of it without a client release.
 
+## Details that look arbitrary but are not
+
+- A network's entries are listed by entity type then entity id, its
+  access rows by the PHP class name (`collate "C"`) then id: the order
+  MySQL's unique indexes returned. Scans are newest first, ties by id
+  descending. Everything else is by id.
+- Freshly created entries and networks answer their keys in the order
+  Laravel set them (`entity_type` first, `id` last); stored rows answer in
+  column order. `serde_json` keeps insertion order (`preserve_order`);
+  use `shift_remove`, never `remove`, on a `Map`.
+- Three timestamp forms (`src/dates.rs`): models `.000000Z`, access and
+  scan answers `+00:00`.
+- The websocket pings only subscribed connections, after a full ping
+  interval of silence, and drops them one tick later with error 4201
+  (`src/pusher/socket.rs`), as Reverb did.
+- adapter-node 6 ignores `ORIGIN` at runtime; the frontend takes the
+  scheme from `PROTOCOL_HEADER` (x-forwarded-proto), so Caddy must pass
+  the real one.
+
 ## Testing rules
 
 - Every change lands with its tests in the same commit.
