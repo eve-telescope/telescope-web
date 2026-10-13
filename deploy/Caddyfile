@@ -1,40 +1,58 @@
-# The production site blocks for the shared Caddy. Same routing as
-# Caddyfile.dev: keep the path list in sync with frontend/proxy-paths.ts.
-# Backend paths (the desktop clients' API, the EVE login redirect, channel
-# auth and the websocket at /app/<key>), and every request that is not a
-# GET or HEAD, go to the api; pages and static files to SvelteKit.
-
-eve-telescope.com {
-	encode zstd gzip
-	header {
-		X-Frame-Options SAMEORIGIN
-		X-XSS-Protection "1; mode=block"
-		X-Content-Type-Options nosniff
+# The shared origin, in production (the proxy image, deploy/Dockerfile,
+# behind Coolify's Traefik, which terminates TLS) and in the local stack
+# (docker-compose.yml, published on :5318). Backend paths (the desktop
+# clients' API, the EVE login redirect, channel auth and the websocket at
+# /app/<key>), and every request that is not a GET or HEAD, go to the api;
+# pages and static files to SvelteKit. Keep the path list in sync with
+# frontend/proxy-paths.ts.
+#
+# Production routes by Host: eve-telescope.com is the site,
+# www.eve-telescope.com redirects to it, and ws.eve-telescope.com carries
+# the Pusher protocol websocket. API_HOST and FRONTEND_HOST name the
+# upstreams; production sets them to the prefixed service names, the
+# local stack keeps the defaults.
+{
+	# Traefik (or the portal) in front: keep its X-Forwarded-* headers, so
+	# the api and SvelteKit see the client's address and https.
+	servers {
+		trusted_proxies static private_ranges
 	}
-	# A shared scan holds up to 500 000 characters.
-	request_body {
-		max_size 8MB
-	}
-
-	@axum {
-		path /api/* /up /eve /sanctum/* /storage/* /broadcasting/auth /app/*
-	}
-	reverse_proxy @axum telescope-api:3000
-
-	@mutation {
-		not method GET HEAD
-	}
-	reverse_proxy @mutation telescope-api:3000
-
-	reverse_proxy telescope-frontend:3000
 }
 
-www.eve-telescope.com {
-	redir https://eve-telescope.com{uri} permanent
-}
+:80 {
+	# www.<domain>, when Coolify routes it here too, redirects to the apex.
+	@www header_regexp www Host ^www\.(.+)$
+	redir @www https://{re.www.1}{uri} permanent
 
-# The Pusher protocol websocket every desktop client connects to
-# (wss://ws.eve-telescope.com:443/app/<key>). Everything goes to the api.
-ws.eve-telescope.com {
-	reverse_proxy telescope-api:3000
+	# The Pusher protocol websocket every desktop client connects to
+	# (wss://ws.eve-telescope.com:443/app/<key>). Everything goes to the api.
+	@ws host ws.eve-telescope.com
+	handle @ws {
+		reverse_proxy {$API_HOST:api}:3000
+	}
+
+	handle {
+		encode zstd gzip
+		header {
+			X-Frame-Options SAMEORIGIN
+			X-XSS-Protection "1; mode=block"
+			X-Content-Type-Options nosniff
+		}
+		# A shared scan holds up to 500 000 characters.
+		request_body {
+			max_size 8MB
+		}
+
+		@axum {
+			path /api/* /up /eve /sanctum/* /storage/* /broadcasting/auth /app/*
+		}
+		reverse_proxy @axum {$API_HOST:api}:3000
+
+		@mutation {
+			not method GET HEAD
+		}
+		reverse_proxy @mutation {$API_HOST:api}:3000
+
+		reverse_proxy {$FRONTEND_HOST:frontend}:3000
+	}
 }

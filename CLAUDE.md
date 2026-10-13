@@ -79,9 +79,9 @@ PATCH must stay 405. Change none of it without a client release.
   rules with Laravel's messages; `src/server/` the router, CORS, error
   answers and the page endpoints (`/api/pages/*`).
 - `migrations/` the schema (never edit an applied migration, sqlx checks
-  their checksums); `deploy/` the Caddyfiles.
+  their checksums); `deploy/` the Caddyfile and the proxy image.
 - `frontend/` the SvelteKit app; `frontend/proxy-paths.ts` is the routing
-  contract, mirrored by `deploy/Caddyfile.dev` and `deploy/Caddyfile`.
+  contract, mirrored by `deploy/Caddyfile`.
 - Development: `docker compose up -d postgres`, `cargo run` (API on
   `BIND_ADDR`, default 127.0.0.1:3000) and `npm run dev` in `frontend/`.
   `.env` for config (see `.env.example`).
@@ -90,8 +90,11 @@ PATCH must stay 405. Change none of it without a client release.
 - `cargo run --bin seed_demo` seeds the demo pilot; `purge_scans
   [--days=N]`, `purge_expired_access` and `refresh_affiliations` run the
   hourly tasks once; `migrate` applies the migrations and exits.
-- Production: `compose.prod.yml` runs the api and frontend images on the
-  shared server, behind its Caddy and Postgres (see the README).
+- Production: Coolify runs `compose.prod.yml` (`telescope-api`,
+  `telescope-frontend` and `telescope-proxy`, images from GHCR built by
+  `.github/workflows/release.yml`); the proxy has both domains and routes
+  ws.eve-telescope.com to the api, which reaches the shared Coolify
+  Postgres over the `coolify` network (see the README).
 
 ## Legacy reference
 

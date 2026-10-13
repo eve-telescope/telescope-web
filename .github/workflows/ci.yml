@@ -40,6 +40,7 @@ jobs:
       rust: ${{ steps.filter.outputs.rust }}
       frontend: ${{ steps.filter.outputs.frontend }}
       stack: ${{ steps.filter.outputs.stack }}
+      proxy: ${{ steps.filter.outputs.proxy }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -68,6 +69,9 @@ jobs:
               - Cargo.lock
               - Dockerfile
               - docker-compose.yml
+              - "deploy/**"
+            proxy:
+              - *workflow
               - "deploy/**"
 
   rust:
@@ -142,6 +146,19 @@ jobs:
         run: npm run format:check
       - name: Test
         run: npm test
+
+  # The production proxy image builds and its Caddyfile parses.
+  proxy:
+    name: Proxy
+    needs: changes
+    if: needs.changes.outputs.proxy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build the image
+        run: docker build -t proxy deploy
+      - name: Validate the Caddyfile
+        run: docker run --rm proxy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 
   e2e:
     name: End to end
@@ -220,7 +237,7 @@ jobs:
   ci:
     name: CI
     if: always() && github.event_name != 'push'
-    needs: [changes, rust, frontend, e2e]
+    needs: [changes, rust, frontend, proxy, e2e]
     runs-on: ubuntu-latest
     steps:
       - name: Result

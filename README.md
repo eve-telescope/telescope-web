@@ -42,8 +42,8 @@ its intel networks.
 One origin serves both: Caddy (or the Vite dev proxy) sends `/api/*`,
 `/up`, `/eve`, `/broadcasting/auth`, `/app/*` and the rest of the list in
 `frontend/proxy-paths.ts`, and every request that is not a GET or HEAD,
-to Axum, and page loads to SvelteKit. The two Caddyfiles in `deploy/`
-hold the same list.
+to Axum, and page loads to SvelteKit. `deploy/Caddyfile` holds the same
+list.
 
 ## Getting started
 
@@ -92,24 +92,18 @@ websocket client. Playwright runs against the composed stack on port
 
 ## Deployment
 
-Production runs on a shared server whose Caddy and Postgres serve several
-sites. `compose.prod.yml` starts only the API and the frontend, from
-images tagged with the commit, on the server's external `web` network:
-
-```bash
-docker build -t telescope-api:$TAG .
-docker build -t telescope-frontend:$TAG frontend
-# in /opt/telescope, with IMAGE_TAG=$TAG and the production values in .env
-docker compose -f compose.prod.yml up -d
-```
-
-`DATABASE_URL`, `EVE_CLIENT_ID`, `EVE_CLIENT_SECRET` and
-`PUSHER_APP_SECRET` go into `.env` next to the compose file; the Pusher
-key defaults to the one every desktop client ships with. The API runs its
-migrations on startup (`migrate` applies them on its own and exits).
-`deploy/Caddyfile` holds the site blocks for eve-telescope.com, its
-`www.` redirect and ws.eve-telescope.com; the server's Caddy keeps a copy
-of it, so change both.
+Coolify deploys `compose.prod.yml` on the server. A merge to main runs
+`.github/workflows/release.yml`, which builds the api, frontend and proxy
+images, pushes them to `ghcr.io/eve-telescope/telescope-*` (`latest` and
+the commit) and calls Coolify's deploy webhook, so Coolify pulls and
+restarts them. Only the proxy has domains (https://eve-telescope.com and
+https://ws.eve-telescope.com, the desktop clients' websocket); Traefik
+terminates TLS in front of it and `deploy/Caddyfile` routes by host.
+`DATABASE_URL` (the shared Coolify Postgres, reached over the `coolify`
+network), `EVE_CLIENT_ID`, `EVE_CLIENT_SECRET` and `PUSHER_APP_SECRET`
+are Coolify environment variables; the Pusher key defaults to the one
+every desktop client ships with. The API runs its migrations on startup
+(`migrate` applies them on its own and exits).
 
 ## Layout
 
@@ -121,7 +115,7 @@ migrations/          the Postgres schema
 tests/integration/   the Rust suites, one binary
 tests/fixtures/      routes, SSO test key and recorded answers
 frontend/            the SvelteKit app and its Playwright suite (e2e/)
-deploy/              Caddyfiles for the local stack and production
+deploy/              the Caddyfile and proxy image, for the local stack and production
 ```
 
 ## License

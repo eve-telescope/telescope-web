@@ -111,13 +111,15 @@ services:
           ignore: [node_modules/, .svelte-kit/, build/]
     logging: *logging
 
+  # The production proxy's Caddyfile (deploy/Dockerfile), mounted so an
+  # edit only needs a restart.
   proxy:
-    image: caddy:2
+    image: caddy:2.11.4
     container_name: telescope-proxy
     ports:
-      - "127.0.0.1:5318:5318"
+      - "127.0.0.1:5318:80"
     volumes:
-      - ./deploy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
     depends_on:
       - api
       - frontend
